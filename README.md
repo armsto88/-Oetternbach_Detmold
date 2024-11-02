@@ -1,2 +1,2 @@
-# Oethernbach_Detmold
-Oethernbach_Detmold Dashboard
+#  Oetternbach, Detmold
+ Oetternbach, Detmold Dashboard
