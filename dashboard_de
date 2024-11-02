@@ -1,0 +1,661 @@
+library(shiny)
+library(leaflet)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(DT)
+library(shinydashboard)
+library(ggthemes)
+library(tidyr)
+
+
+
+# Load the data
+data <- read.csv("master_v2.csv",row.names = 1)
+SITE_data<- read.csv("Site_data.csv")
+result <- read.csv("result.csv")
+species_list <- read.csv("species_list.csv",row.names = 1)
+coverage <- read.csv("coverage.csv")
+
+
+data <- data %>%
+  mutate(corr_datetime = ymd_hms(corr_datetime),
+         my = dmy(my),
+         Call_time = hms(Call_time),
+         hour = hour(Call_time))
+
+
+
+ui <- navbarPage(
+  title = div(
+    tags$img(src = "Oetternbach-Logo-Magenta-300x298.png", height = "65px", style = "margin-right: 50px;
+             margin-top: -20px;margin-left: 1px;"),
+    "Oetternbach, Detmold - Bioakustik-Daten"
+  ),
+  tags$style(HTML("
+        .navbar {
+            padding: 15px;
+             text-align: center;
+        }
+    ")),
+  
+  
+  # Page 1: Overview
+  tabPanel("Übersicht",
+           fluidPage(
+             tags$head(
+               tags$style(HTML("
+    .custom-box {
+      background-color: #ffffff; /* White background for better contrast */
+      border: 1px solid #3288bd; /* Blue border for a more vibrant look */
+      border-radius: 7px; /* Slightly larger rounded corners */
+      padding: 10px; /* Increased padding for a more spacious feel */
+      box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2); /* More prominent shadow for depth */
+      margin-bottom: 10px; /* Space between boxes */
+    }
+    .custom-box h4 {
+      color: #3288bd; /* Blue color for the heading */
+      margin-bottom: 13px; /* Space below the heading */
+      font-weight: bold; /* Bold heading for emphasis */
+    }
+    .custom-box p {
+      color: #333; /* Dark grey for the text for better readability */
+      line-height: 1.4; /* Increased line height for improved readability */
+    }
+  .value-box.icon {
+    font-size: 100px; /* Reasonable icon size */
+    display: block; /* Block display for alignment */
+    margin: 0 auto 10px; /* Center align the icon and space below */
+    text-align: center; /* Center align text below the icon */
+    color: #3288bd; /* Optional: change icon color for better contrast */
+}
+
+.value-box {
+    text-align: center; /* Center align all contents in the box */
+    padding: 8px; /* Add padding inside the box for spacing */
+}
+  "))
+             ),
+             titlePanel("Übersicht"),
+             
+             HTML("<div style='height:10px;'></div>"),
+             fluidRow(
+               column(
+                 width = 2,
+                 class = "value-box-container",
+                 valueBoxOutput("totalRecords", width = NULL)
+               ),
+               column(
+                 width = 2,
+                 class = "value-box-container",
+                 valueBoxOutput("uniqueSpecies", width = NULL)
+               ),
+               column(
+                 width = 2,
+                 class = "value-box-container",
+                 valueBoxOutput("Speciesofconcern", width = NULL)
+               )
+             ),
+             HTML("<div style='height:60px;'></div>"),
+             
+             box(
+               width = 6, 
+               status = "primary", 
+               solidHeader = TRUE,
+               class = "custom-box",
+               HTML(paste0("<div style='padding: 15px;'>",
+                           "<h3 style='color: #3288bd; text-align: left;'>Inhalt</h3>",
+                           "<p style='color: #333; line-height: 1.6; text-align: left;'>",
+                           "Diese Analyse untersucht Audiodaten, die an fünf Standorten im Oetternbach-Gebiet von März 2021 bis September 2022 aufgezeichnet wurden. ",
+                           "Die Aufnahmen wurden in einminütigen Intervallen alle zehn Minuten durchgeführt und anschließend mithilfe des BirdNet Analyzers ausgewertet. ",
+                           "Die Daten wurden verifiziert und artspezifische Vertrauensniveau festgelegt, zur Erhöhung der Genauigkeit. ",
+                           "Unter den 101 identifizierten Vogelarten sind zehn Arten von besonderem Interesse in Deutschland, hauptsächlich aufgrund anthropogener Einflüsse auf ihre Lebensräume, ",
+                           "wie Urbanisierung und störende landwirtschaftliche Praktiken. Die Region Oetternbach stellt einen wichtigen und wertvollen Lebensraum dar, ",
+                           "der die Bedeutung für bereits gefährdete Vogelarten unterstreicht. Effektive Schutzmaßnahmen sind entscheidend, um diese Lebensräume und die damit verbundene avianische Biodiversität zu bewahren.",
+                           "</p>",
+                           "</div>"))),
+             
+             # Leaflet Map
+             column(
+               width = 6,
+               leafletOutput("map", height = "400px")
+             ),
+             
+             HTML("<div style='height:100px;'></div>"),
+             
+             #titlePanel("Gesamtentdeckungen"),
+             HTML("<div style='height:40px;'></div>"),
+             
+             # New row for plots
+             fluidRow(
+               # First plot
+               column(
+                 width = 6,
+                 HTML("<div style='height:40px;'></div>"),
+                 
+                 # In your UI code, add the following selectInput:
+                 selectInput("grouping", "Gruppierung:", choices = c("Monatlich" = "month", "Stündlich" = "hour"),selected = "month"),
+                 
+                 plotOutput("plot1", height = "500px")  # Adjust height as needed
+               ),
+               # Second plot
+               column(
+                 width = 6,
+                 HTML("<div style='height:120px;'></div>"),
+
+                 plotOutput("plot2", height = "500px")  # Adjust height as needed
+               )
+             )
+           )
+  ),
+  
+  # Page 2: Species of Concern
+  tabPanel("Besorgniserregende Arten",
+           
+           fluidPage(
+             
+             tags$head(
+               tags$style(HTML("
+                              .dataTable {
+                                font-size: 12px; /* Adjust font size */
+                                margin: 0; /* Remove default margin */
+                                padding: 5px; /* Reduce padding */
+                              }
+                              .dataTable th, .dataTable td {
+                                padding: 2px; /* Further reduce cell padding */
+                              }
+                             "))
+             ),
+             titlePanel("Besorgniserregende Arten"),
+             HTML("<div style='height:50px;'></div>"),
+             fluidRow(
+               column(width = 4, dataTableOutput("birdTable", width = "100%")),
+               HTML("<div style='height:90px;'></div>"),
+               column(
+                 width = 8,
+                 div(
+                   style = "margin-left: 130px;
+                   margin-top: -80px;",
+                
+                   box(
+                     width = NULL,  # Automatic width
+                     status = "primary",
+                     solidHeader = TRUE,
+                     class = "custom-box",
+                     style = "padding: 15px; line-height: 1.6;",  # Increased padding and line height
+                     HTML(paste0("<div>",
+                                 #"<h4 style='color: #3288bd; margin-bottom: 10px;'>Arten von besonderem Interesse</h4>",
+                                 "<ul style='list-style-type: disc; padding-left: 20px;'>",  # Added padding to list
+                                 "<li><strong>Kiebitz (Vanellus vanellus)</strong><br>Bedrohungen: Gefährdet aufgrund intensiver Landwirtschaft, die Brutgebiete beeinträchtigt, von Feuchtgebietsentwässerung, die Futter- und Nistgebiete reduziert, und von durch den Klimawandel verursachten Habitatveränderungen.</li>",
+                                 "<li><strong>Rotmilan (Milvus milvus)</strong><br>Bedrohungen: Zuvor gefährdet, sieht sich jetzt jedoch illegaler Vergiftung, Jagd, Habitatverlust und Gefahren durch Windkraftanlagen aufgrund von Kollisionen ausgesetzt.</li>",
+                                 "<li><strong>Neuntöter (Lanius collurio)</strong><br>Bedrohungen: Rückläufige Populationen aufgrund von Agrarintensivierung, Verlust von Wiesen, Entfernung von Hecken und durch den Klimawandel beeinträchtigte Beutetilgung und Wanderungsmuster.</li>",
+                                 "<li><strong>Eurasischer Penduline (Remiz pendulinus)</strong><br>Bedrohungen: Nah gefährdet aufgrund von Feuchtgebietsentwässerung, Veränderungen an Uferbereichen und Zerstörung des Lebensraums durch Landwirtschaft und städtische Entwicklung.</li>",
+                                 "<li><strong>Kleinspecht (Dryobates minor)</strong><br>Bedrohungen: Verwundbar aufgrund des Verlusts reifer Wälder und Totholz, die für Nist- und Nahrungsbeschaffung wichtig sind, verschärft durch Waldbewirtschaftungspraktiken und städtische Expansion.</li>",
+                                 "<li><strong>Schwarzer Milan (Milvus migrans)</strong><br>Bedrohungen: Obwohl relativ stabil, sieht er sich Bedrohungen durch Vergiftung, Verschmutzung, Habitatveränderungen, illegale Verfolgung und Kollisionen mit Windturbinen ausgesetzt.</li>",
+                                 "<li><strong>Kranich (Grus grus)</strong><br>Bedrohungen: Verlust des Lebensraums durch Feuchtgebietsentwässerung, menschliche Störungen während der Brutzeit und veränderte Landnutzung. Der Klimawandel beeinflusst Migrationsrouten und -zeiten.</li>",
+                                 "<li><strong>Sumpfrohrsänger (Acrocephalus palustris)</strong><br>Bedrohungen: Unter Druck aufgrund von Lebensraumdegradation, insbesondere durch Feuchtgebietsentwässerung und landwirtschaftliche Umwandlung, sowie durch Störungen durch extremen Wetterereignisse, die mit dem Klimawandel verbunden sind.</li>",
+                                 "<li><strong>Wachtel (Coturnix coturnix)</strong><br>Bedrohungen: Nah gefährdet aufgrund intensiver Landwirtschaft, Pestizideinsatz und Habitatverlust, die den Bruterfolg beeinträchtigen. Der Klimawandel könnte auch die Wanderungsmuster beeinflussen.</li>",
+                                 "<li><strong>Eurasische Feldlerche (Alauda arvensis)</strong><br>Bedrohungen: Verwundbar aufgrund der Agrarintensivierung, die Nistflächen und Nahrungsquellen reduziert, sowie der Auswirkungen von Pestiziden auf Insektenpopulationen.</li>",
+                                 "</ul>",
+                                 "</div>"))
+                   )
+                   
+                   )
+                 )
+               )
+           )),
+           
+  
+  
+  
+  # Page 3: Time Series Analysis
+  tabPanel(
+    "Arten & Zeitanalyse",
+    fluidPage(
+      titlePanel("Arten & Zeitanalyse"),
+      
+      # Create a two-column layout
+      fluidRow(
+        # Left column for selection inputs and plots
+        column(
+          width = 6,
+          
+          # Selection inputs
+          selectInput(
+            "speciesSelect", 
+            "Art auswählen", 
+            choices = unique(data$name_german),
+            selected = "Kohlmeise",
+            multiple = TRUE
+          ),
+          
+          selectInput("agg_type", "Gruppierung:", choices = c("Monat", "Jahr"),selected = "Monat"),
+          
+          # Monthly Plot
+          plotOutput("monthlyPlot", height = "350px"),  # Adjust height if needed
+          HTML("<div style='height:30px;'></div>"),
+          
+          # Hourly Plot
+          plotOutput("hourlyPlot", height = "350px")  # Adjust height if needed
+        ),
+        
+        # Right column for data table
+        column(
+          width = 6,
+          
+          # Data Table Output
+          dataTableOutput("speciesTable")
+        )
+      )
+    )
+  ),
+  
+  
+  # Page 4: Downloads
+  tabPanel("Downloads",
+           fluidPage(
+             tags$head(
+               tags$style(HTML("
+               .download-box {
+                 background-color: #f8f9fa; 
+                 border: 1px solid #3288bd; 
+                 border-radius: 10px; 
+                 padding: 20px; 
+                 margin-bottom: 20px; 
+                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+               }
+               .download-box h4 {
+                 color: #3288bd; 
+                 margin-bottom: 15px; 
+                 text-align: center;
+               }
+               .download-button {
+                 width: 100%; /* Full-width buttons */
+                 margin-bottom: 10px; /* Spacing between buttons */
+               }
+               .download-button_2 {
+                 width: 30%; /* Full-width buttons */
+                 margin-bottom: 10px; /* Spacing between buttons */
+               }
+               .main-panel p {
+                 margin-bottom: 20px; /* Space below paragraphs */
+               }
+               .download-list {
+                 list-style-type: none; /* Remove bullets */
+                 padding-left: 0; /* Remove padding */
+               }
+               .download-list li {
+                 margin-bottom: 10px; /* Space between list items */
+               }
+             "))
+             ),
+             
+             titlePanel("Daten herunterladen"),
+             HTML("<div style='height:40px;'></div>"),
+             
+             sidebarLayout(
+               sidebarPanel(
+                 h4("Download-Optionen"),
+        #         tags$a(
+         #          href = "https://drive.google.com/file/d/1Bz1Wq30uX2ARRduz0OxOpVaw03ZmldG2/view?usp=sharing",  # Replace with your URL
+          #         target = "_blank",                  # Opens the link in a new tab
+           #        actionButton("linkButton", "Bericht herunterladen", class = "download-button")  # Button style
+             #    ),
+                 downloadButton("downloadreport","Bericht herunterladen", class = "download-button"),
+                 downloadButton("downloadRData", "Rohdaten herunterladen", class = "download-button"),
+                 downloadButton("downloadData", "Artenliste herunterladen", class = "download-button"),
+                 br(),
+                 p("Wählen Sie einen Datensatz zum Herunterladen aus.", style = "text-align: center;")
+                 
+                 
+               ),
+               mainPanel(
+                 div(class = "download-box",
+                     h4("Verfügbare Downloads"),
+                     p("Sie können die folgenden Datensätze herunterladen:"),
+                     tags$ul(class = "download-list",
+                             tags$li("Bericht: Statischer Bericht der Ergebnisse."),
+                             tags$li("Rohdaten: Enthält alle aufgezeichneten Daten."),
+                             tags$li("Artenliste: Enthält eine Liste aller Arten und der Gesamtdetektionen.")
+                     )
+                 ),
+                 HTML("<div style='height:80px;'></div>"),  # Spacer
+                 tags$head(
+                   tags$style(HTML("
+      .icon-container {
+        display: flex; /* Use flexbox to align items in a row */
+        align-items: center; /* Center align items vertically */
+      }
+    "))),
+                 # New contact box
+                 div(class = "contact-box",
+                     h4("Kontakt"),
+                     p("Für Anfragen können Sie uns unter folgendem Kontakt erreichen:"),
+                     div(class = "icon-container",
+                     tags$a(
+                       href = "mailto:thomasgarmstrong88@gmail.com",  # Mailto link
+                       tags$img(
+                         src = "mail-142.svg",  # Corrected to remove "www/" prefix
+                         alt = "Email",
+                         style = "width: 60px; height: auto; vertical-align: middle; margin-right: 5px;"  # Style for icon
+                       ),
+                       "",  # Email text
+                       style = "text-decoration: none; color: #3288bd;"  # Style for the email link
+                     ),
+                     br(),
+                     tags$a(
+                       href = "https://www.linkedin.com/in/tom-armstrong-8788452b/",  # LinkedIn URL
+                       target = "_blank",  # Opens the link in a new tab
+                       tags$img(
+                         src = "LinkedIn_logo_initials.png",  # Corrected to remove "www/" prefix
+                         alt = "LinkedIn",
+                         style = "width: 50px; height: auto;"  # Adjust size as needed
+                       )
+                     ),
+                     HTML("<div style='height:80px;'></div>"),  # Spacer
+                     
+                 )))))))
+             
+           
+
+server <- function(input, output, session) {
+  
+  
+  
+  # Summary Statistics
+  output$totalRecords <- renderValueBox({
+    valueBox(nrow(data), "Erfasst", icon = icon("database"))
+  })
+  
+  output$uniqueSpecies <- renderValueBox({
+    valueBox(length(unique(data$name_german)), "Artname", icon = icon("feather"))
+  })
+  
+  species_of_concern <- c(
+    "Northern Lapwing",
+    "Red Kite",
+    "Red-backed Shrike",
+    "Eurasian Penduline-Tit",
+    "Lesser Spotted Woodpecker",
+    "Black Kite",
+    "Common Crane",
+    "Marsh Warbler",
+    "Common Quail",
+    "Eurasian Skylark"
+  )
+  
+  output$Speciesofconcern <- renderValueBox({
+    valueBox(length(species_of_concern), "Besorgniserregende Arten", icon = icon("exclamation-triangle"))
+  })
+  
+  # Data Preview Table
+  #output$dataPreview <- renderDataTable({
+  # datatable(data)
+  #})
+  
+  # Leaflet Map
+  output$map <- renderLeaflet({
+    req(SITE_data)  # Ensure data is available before rendering the map
+    
+    
+    map <- leaflet(SITE_data) %>%
+      addProviderTiles(providers$Esri.WorldImagery, group = "Satellite") %>%
+      addProviderTiles(providers$OpenStreetMap, group = "OpenStreetMap")  %>%  # Adds satellite basemap
+      fitBounds(lng1 = 8.8396187446, lat1 = 51.9552986308, 
+                lng2 = 8.8647194143, lat2 = 51.9664450509) %>%
+      addMiniMap(
+        toggleDisplay = T,             # Keeps minimap always visible
+        minimized = F,                 # Shows minimap by default
+        tiles = providers$OpenStreetMap,   # Tiles used for inset
+        width = 100,                       # Width of minimap
+        height = 100,                      # Height of minimap
+        zoomLevelOffset = -4          # Zoom level for minimap
+      )%>%
+      addLayersControl(baseGroups = c("Satellite", "OpenStreetMap"),
+                       options = layersControlOptions(collapsed = FALSE)  # Options to keep the control expanded
+      )%>%
+      
+      addMarkers(lat = ~LAT,lng = ~LNG, popup = ~paste("<b>Standortname:</b>", site_name, "<br><b>Einzigartige Arten:</b>", count,"<br><b>Besorgniserregende Arten:</b>",Species_of_concern ))
+    
+  })
+  library(lubridate)
+  library(dplyr)
+  library(ggplot2)
+  
+  output$plot1 <- renderPlot({
+    grouping <- input$grouping
+    
+    # Ensure corr_datetime is parsed correctly (adjust the format as needed)
+    #data <- data %>%
+     
+    # mutate(corr_datetime = dmy(my))  # Adjust to your datetime format
+    
+    # Define fixed start and end dates
+    start_date <- as.Date("2021-03-01")
+    end_date <- as.Date("2022-09-01")
+    
+    # Prepare the plot data based on grouping
+    if (grouping == "month") {
+      plot_data_summary <- data %>%
+        mutate(my = floor_date(my, "month")) %>%  # Create month variable
+        group_by(my) %>%
+        summarise(Detections = n(), .groups = "drop")  # Count detections
+      x_var <- plot_data_summary$my  # Use 'my' for x variable
+    } else if (grouping == "hour") {
+      plot_data_summary <- data %>%
+       # mutate(hour_corr) %>%  # Extract hour
+        group_by(hour_corr) %>%
+        summarise(Detections = n(), .groups = "drop")  # Count detections
+      x_var <- plot_data_summary$hour_corr  # Use 'hour_corr' for x variable
+    }
+    
+    # Create the plot
+    p <- ggplot(plot_data_summary, aes(x = x_var, y = Detections)) +
+      geom_point(size = 3, color = "#fdae61") +
+      geom_line(color = "#66c2a5", linewidth = 1) +
+      theme_minimal() +
+      labs(x = "Zeit", y = "Enrfassung") +
+      theme_few() +
+      theme(legend.title = element_blank())+
+      theme_few()+
+      theme(plot.margin = margin(1, 1, 1, 1, unit = "cm"),
+            axis.text.x = element_text(angle = 45,vjust = .6),
+            axis.title.x = element_text(vjust = -2,face = "bold"),
+            axis.title.y = element_text(face="bold",vjust = 3),
+      )
+    
+    # Set the x-axis scale based on the grouping
+    if (grouping == "month") {
+      p <- p + scale_x_date(date_labels = "%b %Y", date_breaks = "1 month", limits = c(start_date, end_date))
+    } else if (grouping == "hour") {
+      p <- p + scale_x_continuous(breaks = seq(0, 23, 1), limits = c(0, 23))  # Hourly breaks
+    }
+    
+    p
+  })
+  
+  output$plot2 <- renderPlot({
+    coverage %>%
+      mutate(
+        count = replace_na(count, 0),
+        # Convert month_year to Date format with the first day of each month
+        month_year = as.Date(paste0(month_year, "-01")),
+        # Create a formatted label for display without affecting date sorting
+        month_year_label = format(month_year, "%b %y")
+      ) %>%  
+      filter(!is.na(count), month_year != as.Date("1970-01-01")) %>%  # Filter out unwanted date
+      group_by(month_year, month_year_label) %>%  # Group by both date and label
+      summarise(count = sum(count) / 60, .groups = 'drop') %>%  
+      ggplot(aes(x = month_year, y = count)) +  
+      geom_col( position = "dodge",size = 3, fill = "#66c2a5", alpha = .8) + 
+      geom_line(color = "#fdae61", linewidth = 1)+
+      # Order x-axis by the actual date, but display formatted labels
+      scale_x_date(date_labels = "%b %y", breaks = "1 month") +
+      labs(
+        x = "Zeit", 
+        y = "Erfasste Stunden"
+      ) +
+      theme_few() +
+      theme(legend.title = element_blank())+
+      theme_few()+
+      theme(plot.margin = margin(1, 1, 1, 1, unit = "cm"),
+            axis.text.x = element_text(angle = 45,vjust = .6),
+            axis.title.x = element_text(vjust = -2,face = "bold"),
+            axis.title.y = element_text(face="bold",vjust = 3),
+      )
+  })
+    
+  
+  
+  
+  
+  result <- result %>%
+    select(Artname,Erhaltungszustand,Total.detections, Site) %>%
+    rename(Standort = Site,
+           Erfassung =Total.detections)
+  
+  output$birdTable <- renderDataTable({
+    datatable(result, escape = FALSE, 
+              options = list(
+                pageLength = 15,
+                dom = 'tip',
+                columnDefs = list(list(
+                  className = 'dt-center',
+                  targets = "_all"
+                ))
+              )) 
+  })
+  
+  
+
+  
+  # Monthly Plot
+  # Reactive expression to aggregate data based on selection
+  aggregated_data <- reactive({
+    if (input$agg_type == "Monat") {
+      data %>%
+        filter(name_german %in% input$speciesSelect) %>%
+        group_by(my, name_german) %>%
+        summarise(Total.detections = n(), .groups = "drop")
+    } else {
+      data %>%
+        filter(name_german %in% input$speciesSelect) %>%
+        group_by(Year, name_german) %>%
+        summarise(Total.detections = n(), .groups = "drop")
+    }
+  })
+  
+  start_date <- as.Date("2021-03-01")  # Change this to your desired start date
+  end_date <- as.Date("2022-10-01")
+  
+  
+  #filtered_data <- data %>%
+  # filter(Common.name %in% input$speciesSelect) %>%
+  #group_by(my,Common.name) %>%
+  #summarise(Total.detections = n(),.groups = "drop")
+  
+  output$monthlyPlot <- renderPlot({
+    req(input$speciesSelect)
+    
+    p <- ggplot(aggregated_data(), aes(x = if (input$agg_type == "Monat") my else Year, 
+                                       y = Total.detections, 
+                                       colour = name_german)) +
+      geom_line() +
+      geom_point(size = 3) +
+      theme_few() +
+      theme(
+        legend.position = "bottom",
+        axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"),
+        axis.text.y = element_text(face = "bold"),
+        axis.title.x = element_text(vjust = -2),
+        axis.title.y = element_text(vjust = 3)
+      ) +
+      labs(title = "Monatliche / Jährliche Enrfassung", x = "Zeit", y = "Enrfassung", colour = "Artname") +
+      scale_colour_brewer(palette = "Set2")
+    
+    # Apply scale_x_date only if "Month" is selected
+    if (input$agg_type == "Monat") {
+      p <- p + scale_x_date(date_labels = "%b %Y", date_breaks = "1 month", limits = c(start_date, end_date))
+    } else {
+      p <- p + scale_x_continuous(breaks = seq(min(aggregated_data()$Year), max(aggregated_data()$Year), 1))
+    }
+    
+    p
+  })
+  
+  # Hourly Plot
+  output$hourlyPlot <- renderPlot({
+    req(input$speciesSelect)
+    filtered_data <- data %>%
+      filter(name_german %in% input$speciesSelect) %>%
+      group_by(hour_corr,name_german) %>%
+      summarise(Total.detections = n(), .groups = "drop")
+    
+    ggplot(filtered_data, aes(x = hour_corr, y = Total.detections, colour = name_german)) +
+      geom_line() +
+      geom_point(size = 3) +
+      theme_few() +
+      theme(legend.position = "bottom",
+            axis.text.x = element_text(hjust = 1,face = "bold"),
+            axis.text.y = element_text(face = "bold"),
+            axis.title.x = element_text(vjust = -2),
+            axis.title.y = element_text(vjust = 3)) +
+      labs(title = "Stündliche Enrfassung ", x = "Stunde", y = "Enrfassung",colour = "Artname") +
+      scale_x_continuous(limits = c(0,23))+
+      scale_colour_brewer(palette = "Set2") 
+  })
+  
+  Artenliste<-data%>%
+    select(name_german,Scientific.name)%>%
+    rename(Artname = name_german,
+           Wissenschaftlicher.Name = Scientific.name)%>%
+    group_by(Artname,Wissenschaftlicher.Name)%>%
+    summarise(Erfassung = n())
+  
+  output$speciesTable <- renderDataTable({
+    datatable(Artenliste, escape = FALSE, 
+              options = list(
+                pageLength = 20,
+                #dom = 'tip',                       # 'tip' format hides unnecessary elements like filter and length options
+                #scrollX = T,                    # Enables horizontal scrolling
+                #scrollY = "500px",                 # Fixed height for vertical scrolling
+                #autoWidth = F,                  # Automatically adjusts column widths
+                columnDefs = list(list(
+                  className = 'dt-center',         # Center-aligns all content
+                  targets = "_all"                 # Applies to all columns
+                ))))
+  })
+  
+ 
+  output$downloadreport <- downloadHandler(
+    filename = function() {
+      paste("Report", "_", Sys.Date(), "_", ".pdf", sep = "")
+    },
+    content = function(file) {
+      # Copy the report from the 'www' directory to the download location
+      file.copy("www/Report_v2.de.pdf", file)
+    }
+  )
+
+  
+  
+  output$downloadData <- downloadHandler(
+    filename = function() { 
+      paste("Artenliste","_", Sys.Date(),"_", ".csv", sep = "") 
+    },
+    content = function(file) {
+      write.csv(Artenliste, file, row.names = FALSE)
+    }
+  )
+  
+  output$downloadRData <- downloadHandler(
+    filename = function() { 
+      paste("Rohdaten","_",Sys.Date(),"_", ".csv", sep = "") 
+    },
+    content = function(file) {
+      write.csv(data, file = file)
+    }
+  )
+}
+
+shinyApp(ui, server)
