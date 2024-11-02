@@ -316,55 +316,77 @@ ui <- navbarPage(
                  
                  
                ),
-               mainPanel(
-                 div(class = "download-box",
-                     h4("Verfügbare Downloads"),
-                     p("Sie können die folgenden Datensätze herunterladen:"),
-                     tags$ul(class = "download-list",
-                             tags$li("Bericht: Statischer Bericht der Ergebnisse."),
-                             tags$li("Rohdaten: Enthält alle aufgezeichneten Daten."),
-                             tags$li("Artenliste: Enthält eine Liste aller Arten und der Gesamtdetektionen.")
-                     )
-                 ),
-                 HTML("<div style='height:80px;'></div>"),  # Spacer
-                 tags$head(
-                   tags$style(HTML("
+        mainPanel(
+          div(class = "download-box",
+              h4("Verfügbare Downloads"),
+              p("Sie können die folgenden Datensätze herunterladen:"),
+              tags$ul(class = "download-list",
+                      tags$li("Bericht: Statischer Bericht der Ergebnisse."),
+                      tags$li("Rohdaten: Enthält alle aufgezeichneten Daten."),
+                      tags$li("Artenliste: Enthält eine Liste aller Arten und der Gesamtdetektionen.")
+              )
+          ),
+          HTML("<div style='height:80px;'></div>"),  # Spacer
+          tags$head(
+            tags$style(HTML("
       .icon-container {
         display: flex; /* Use flexbox to align items in a row */
         align-items: center; /* Center align items vertically */
+        margin-bottom: 10px; /* Space between each contact method */
       }
-    "))),
-                 # New contact box
-                 div(class = "contact-box",
-                     h4("Kontakt"),
-                     p("Für Anfragen können Sie uns unter folgendem Kontakt erreichen:"),
-                     div(class = "icon-container",
-                     tags$a(
-                       href = "mailto:thomasgarmstrong88@gmail.com",  # Mailto link
-                       tags$img(
-                         src = "mail-142.svg",  # Corrected to remove "www/" prefix
-                         alt = "Email",
-                         style = "width: 60px; height: auto; vertical-align: middle; margin-right: 5px;"  # Style for icon
-                       ),
-                       "",  # Email text
-                       style = "text-decoration: none; color: #3288bd;"  # Style for the email link
-                     ),
-                     br(),
-                     tags$a(
-                       href = "https://www.linkedin.com/in/tom-armstrong-8788452b/",  # LinkedIn URL
-                       target = "_blank",  # Opens the link in a new tab
-                       tags$img(
-                         src = "LinkedIn_logo_initials.png",  # Corrected to remove "www/" prefix
-                         alt = "LinkedIn",
-                         style = "width: 50px; height: auto;"  # Adjust size as needed
-                       )
-                     ),
-                     HTML("<div style='height:80px;'></div>"),  # Spacer
-                     
-                 )))))))
-             
-           
+      .icon-container img {
+        height: auto; /* Maintain aspect ratio */
+        margin-right: 10px; /* Space between icon and text */
+      }
+      .contact-box {
+        margin-top: 20px; /* Space above the contact box */
+      }
+    "))
+          ),
+          
+          # New contact box
+          div(class = "contact-box",
+              h4("Kontakt"),
+              p("Für Anfragen können Sie uns unter folgendem Kontakt erreichen:"),
+              div(class = "icon-container",
+                  tags$a(
+                    href = "mailto:thomasgarmstrong88@gmail.com",  # Mailto link
+                    tags$img(
+                      src = "mail-142.svg",  # Email icon
+                      alt = "Email",
+                      style = "width: 75px;"  # Set size inline
+                    ),
+                    style = "text-decoration: none; color: #3288bd;"  # Style for the email link
+                  ),
+                  tags$a(
+                    href = "https://www.linkedin.com/in/tom-armstrong-8788452b/",  # LinkedIn URL
+                    target = "_blank",  # Opens the link in a new tab
+                    tags$img(
+                      src = "LinkedIn_logo_initials.png",  # LinkedIn logo
+                      alt = "LinkedIn",
+                      style = "width: 60px;"  # Set size inline
+                    )
+                  ),
+                  tags$a(
+                    href = "https://github.com/armsto88/-Oetternbach_Detmold/tree/main",  # GitHub URL
+                    target = "_blank",  # Opens the link in a new tab
+                    tags$img(
+                      src = "GitHub_Logo.png",  # GitHub logo
+                      alt = "GitHub",
+                      style = "width: 90px;"  # Set size inline
+                    )
+                  )
+              )
+          ),
+          
+          HTML("<div style='height:100px;'></div>")  # Spacer
+        )))))
 
+        
+        
+        
+        
+        
 server <- function(input, output, session) {
   
   
