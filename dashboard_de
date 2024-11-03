@@ -140,7 +140,7 @@ ui <- navbarPage(
                  width = 6,
                  HTML("<div style='height:60px;'></div>"),
                  
-                 titlePanel("Erfassung über zeit"),
+                 titlePanel("Artenerfassung über Zeit"),
                  HTML("<div style='height:50px;'></div>"),
                  
                  # In your UI code, add the following selectInput:
@@ -153,12 +153,12 @@ ui <- navbarPage(
                  width = 6,
                  HTML("<div style='height:60px;'></div>"),
                  
-                 titlePanel("Verteilung der Probenahme"),
+                 titlePanel("Aufnahmedauer pro Monat"),
                  HTML("<div style='height:50px;'></div>"),
                  selectInput(
                    inputId = "group_by",
                    label = "Gruppierung:",
-                   choices = list("Jahr/Monat" = "month_year", "Standort und Monat/Jahr" = "site_month_year"),
+                   choices = list("Monat/Jahr" = "month_year", "Standort" = "site_month_year"),
                    selected = "month_year"
                  ),
 
@@ -341,7 +341,14 @@ ui <- navbarPage(
                       tags$li("Artenliste: Enthält eine Liste aller Arten und der Gesamtdetektionen.")
               )
           ),
-          HTML("<div style='height:80px;'></div>"),  # Spacer
+          div(style = "text-align: center;",  # Center the image horizontally
+              tags$img(
+                src = "UFR-vorlage-designsystem-typo-farben-V1.92.png", 
+                height = "300px", 
+                style = "margin-top: -10px;"  # You can remove margin-left and margin-right for centering
+              )
+          ),
+          HTML("<div style='height:10px;'></div>"),  # Spacer
           tags$head(
             tags$style(HTML("
       .icon-container {
@@ -365,6 +372,7 @@ ui <- navbarPage(
               h4("Kontakt"),
               p("Für Anfragen können Sie uns unter folgendem Kontakt erreichen:"),
               div(class = "icon-container",
+                  style = "display: flex; justify-content:  align-items: center;",  # Flexbox for horizontal alignment
                   tags$a(
                     href = "mailto:thomasgarmstrong88@gmail.com",  # Mailto link
                     tags$img(
@@ -391,15 +399,11 @@ ui <- navbarPage(
                       alt = "GitHub",
                       style = "width: 90px;"  # Set size inline
                     )
-                  ),
-                        
+                  )
               )
           ),
-          tags$img(
-            src = "UFR-vorlage-designsystem-typo-farben-V1.92.png", 
-            height = "400px", 
-            style = "margin-right: 400px; margin-top: -20px; margin-left: 80px;"
-          ),
+          
+          
           
           
           
@@ -421,7 +425,7 @@ server <- function(input, output, session) {
   })
   
   output$uniqueSpecies <- renderValueBox({
-    valueBox(length(unique(data$name_german)), "Artname", icon = icon("feather"))
+    valueBox(length(unique(data$name_german)), "Artnamen", icon = icon("feather"))
   })
   
   species_of_concern <- c(
@@ -507,7 +511,7 @@ server <- function(input, output, session) {
       geom_point(size = 3, color = "#fdae61") +
       geom_line(color = "#66c2a5", linewidth = 1) +
       theme_minimal() +
-      labs(x = "Zeit", y = "Enrfassung") +
+      labs(x ="Monat/Jahr", y = "Anzahl an Artenerfassungen") +
       theme_few() +
       theme(legend.title = element_blank())+
       theme_few()+
@@ -523,6 +527,12 @@ server <- function(input, output, session) {
     } else if (grouping == "hour") {
       p <- p + scale_x_continuous(breaks = seq(0, 23, 1), limits = c(0, 23))  # Hourly breaks
     }
+    if (grouping == "month") {
+      p <- p + labs(x = "Monat/Jahr")
+    } else if (grouping == "hour") {
+      p <- p + labs(x = "Uhr Zeit")  # Hourly breaks
+    }
+    
     
     p
   })
@@ -561,8 +571,8 @@ server <- function(input, output, session) {
       geom_col(position = "dodge",alpha = if (input$group_by =="site_month_year").5 else .8 ,width = if (input$group_by == "site_month_year") 70 else 35) +
       scale_x_date(date_labels = "%b %y", breaks = "1 month") +
       labs(
-        x = "Zeit",
-        y = "Erfasste Stunden"
+        x = "Monat/Jahr",
+        y = "Aufnahmedauer (in Stunden)"
       ) +
       theme_few() +
       theme(
@@ -652,7 +662,7 @@ server <- function(input, output, session) {
         axis.title.x = element_text(vjust = -2),
         axis.title.y = element_text(vjust = 3)
       ) +
-      labs(title = "Monatliche / Jährliche Enrfassung", x = "Zeit", y = "Enrfassung", colour = "Artname") +
+      labs(title = "Monatliche / Jährliche Erfassung", x = "Zeit", y = "Erfassung", colour = "Artnamen") +
       scale_colour_brewer(palette = "Set2")
     
     # Apply scale_x_date only if "Month" is selected
@@ -682,7 +692,7 @@ server <- function(input, output, session) {
             axis.text.y = element_text(face = "bold"),
             axis.title.x = element_text(vjust = -2),
             axis.title.y = element_text(vjust = 3)) +
-      labs(title = "Stündliche Enrfassung ", x = "Stunde", y = "Enrfassung",colour = "Artname") +
+      labs(title = "Stündliche Erfassung ", x = "Uhr Zeit", y = "Erfassung",colour = "Artnamen") +
       scale_x_continuous(limits = c(0,23))+
       scale_colour_brewer(palette = "Set2") 
   })
