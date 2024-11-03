@@ -128,17 +128,20 @@ ui <- navbarPage(
                leafletOutput("map", height = "400px")
              ),
              
-             HTML("<div style='height:100px;'></div>"),
+             HTML("<div style='height:70px;'></div>"),
              
-             #titlePanel("Gesamtentdeckungen"),
-             HTML("<div style='height:40px;'></div>"),
+            
+             HTML("<div style='height:60px;'></div>"),
              
              # New row for plots
              fluidRow(
                # First plot
                column(
                  width = 6,
-                 HTML("<div style='height:40px;'></div>"),
+                 HTML("<div style='height:60px;'></div>"),
+                 
+                 titlePanel("Erfassung über zeit"),
+                 HTML("<div style='height:50px;'></div>"),
                  
                  # In your UI code, add the following selectInput:
                  selectInput("grouping", "Gruppierung:", choices = c("Monatlich" = "month", "Stündlich" = "hour"),selected = "month"),
@@ -148,9 +151,20 @@ ui <- navbarPage(
                # Second plot
                column(
                  width = 6,
-                 HTML("<div style='height:120px;'></div>"),
+                 HTML("<div style='height:60px;'></div>"),
+                 
+                 titlePanel("Verteilung der Probenahme"),
+                 HTML("<div style='height:50px;'></div>"),
+                 selectInput(
+                   inputId = "group_by",
+                   label = "Gruppierung:",
+                   choices = list("Jahr/Monat" = "month_year", "Standort und Monat/Jahr" = "site_month_year"),
+                   selected = "month_year"
+                 ),
 
-                 plotOutput("plot2", height = "500px")  # Adjust height as needed
+                 plotOutput("plot2", height = "500px"),
+                 HTML("<div style='height:50px;'></div>")
+                 # Adjust height as neede
                )
              )
            )
@@ -312,7 +326,8 @@ ui <- navbarPage(
                  downloadButton("downloadRData", "Rohdaten herunterladen", class = "download-button"),
                  downloadButton("downloadData", "Artenliste herunterladen", class = "download-button"),
                  br(),
-                 p("Wählen Sie einen Datensatz zum Herunterladen aus.", style = "text-align: center;")
+                 p("Wählen Sie einen Datensatz zum Herunterladen aus.", style = "text-align: center;"),
+
                  
                  
                ),
@@ -343,6 +358,7 @@ ui <- navbarPage(
       }
     "))
           ),
+         
           
           # New contact box
           div(class = "contact-box",
@@ -375,9 +391,17 @@ ui <- navbarPage(
                       alt = "GitHub",
                       style = "width: 90px;"  # Set size inline
                     )
-                  )
+                  ),
+                        
               )
           ),
+          tags$img(
+            src = "UFR-vorlage-designsystem-typo-farben-V1.92.png", 
+            height = "400px", 
+            style = "margin-right: 400px; margin-top: -20px; margin-left: 80px;"
+          ),
+          
+          
           
           HTML("<div style='height:100px;'></div>")  # Spacer
         )))))
@@ -504,34 +528,63 @@ server <- function(input, output, session) {
   })
   
   output$plot2 <- renderPlot({
-    coverage %>%
+    plot_data <- coverage %>%
       mutate(
         count = replace_na(count, 0),
-        # Convert month_year to Date format with the first day of each month
         month_year = as.Date(paste0(month_year, "-01")),
-        # Create a formatted label for display without affecting date sorting
-        month_year_label = format(month_year, "%b %y")
-      ) %>%  
-      filter(!is.na(count), month_year != as.Date("1970-01-01")) %>%  # Filter out unwanted date
-      group_by(month_year, month_year_label) %>%  # Group by both date and label
-      summarise(count = sum(count) / 60, .groups = 'drop') %>%  
-      ggplot(aes(x = month_year, y = count)) +  
-      geom_col( position = "dodge",size = 3, fill = "#66c2a5", alpha = .8) + 
-      geom_line(color = "#fdae61", linewidth = 1)+
-      # Order x-axis by the actual date, but display formatted labels
+        month_year_label = format(month_year, "%b %y"),
+        site = recode(site, 
+                      "BO_count" = "Balbrede Oetternbach",
+                      "BW_count" = "Balbrede Wiese",
+                      "OJ_count" = "Jürgens Eiche",
+                      "PK_count" = "Peterskamp",
+                      "BE_count" = "Balbrede Esche")
+      ) %>%
+      filter(!is.na(count), month_year != as.Date("1970-01-01")) %>%
+      {
+        if (input$group_by == "month_year") {
+          group_by(., month_year, month_year_label)
+        } else if (input$group_by == "site_month_year") {
+          group_by(., site, month_year, month_year_label)
+        } else {
+          .
+        }
+      } %>%
+      summarise(count = sum(count) / 60, .groups = 'drop')
+    
+    # Set up ggplot with conditional fill mapping
+    p <- ggplot(plot_data, aes(
+      x = month_year,
+      y = count,
+      fill = if (input$group_by == "site_month_year") as.factor(site) else "#66c2a5"
+    )) +
+      geom_col(position = "dodge",alpha = if (input$group_by =="site_month_year").5 else .8 ,width = if (input$group_by == "site_month_year") 70 else 35) +
       scale_x_date(date_labels = "%b %y", breaks = "1 month") +
       labs(
-        x = "Zeit", 
+        x = "Zeit",
         y = "Erfasste Stunden"
       ) +
       theme_few() +
-      theme(legend.title = element_blank())+
-      theme_few()+
-      theme(plot.margin = margin(1, 1, 1, 1, unit = "cm"),
-            axis.text.x = element_text(angle = 45,vjust = .6),
-            axis.title.x = element_text(vjust = -2,face = "bold"),
-            axis.title.y = element_text(face="bold",vjust = 3),
+      theme(
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        legend.text = element_text(size = 10),   # Change legend text size
+        plot.margin = margin(1, 1, 1, 1, unit = "cm"),
+        axis.text.x = element_text(angle = 45, vjust = .6),
+        axis.title.x = element_text(vjust = -2, face = "bold"),
+        axis.title.y = element_text(face = "bold", vjust = 3)
       )
+    
+    # Apply scale_fill only when needed
+    if (input$group_by == "site_month_year") {
+      p <- p + scale_fill_brewer(palette = "Set1")
+    } else {
+      p <- p + scale_fill_identity()  # Ensures the color "#66c2a5" is used as-is
+    }
+    
+    # Print the plot
+    p
+    
   })
     
   
