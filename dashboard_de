@@ -343,9 +343,9 @@ ui <- navbarPage(
                      h4("Verfügbare Downloads"),
                      p("Sie können die folgenden Datensätze herunterladen:"),
                      tags$ul(class = "download-list",
-                             tags$li("Bericht: Statischer Bericht der Ergebnisse."),
-                             tags$li("Rohdaten: Enthält alle aufgezeichneten Daten."),
-                             tags$li("Artenliste: Enthält eine Liste aller Arten und der Gesamtdetektionen.")
+                             tags$li(tags$strong("Bericht:"), "Statischer Bericht der Ergebnisse."),
+                             tags$li(tags$strong("Rohdaten:"), "Enthält alle aufgezeichneten Daten."),
+                             tags$li(tags$strong("Artenliste:"), "Enthält eine Liste aller Arten und der Gesamtdetektionen.")
                      )
                  ),
                  HTML("<div style='height:30px;'></div>"),  # Spacer
@@ -734,7 +734,7 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       # Copy the report from the 'www' directory to the download location
-      file.copy("www/Report_v3_de.pdf", file)
+      file.copy("www/Report_v4_de.pdf", file)
     }
   )
   
