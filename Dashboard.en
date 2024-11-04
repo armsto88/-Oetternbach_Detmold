@@ -11,16 +11,16 @@ library(tidyr)
 
 
 # Load the data
-data <- read.csv("master_v2.csv",row.names = 1)
+data <- read.csv("master_v4.csv",row.names = 1)
 SITE_data<- read.csv("Site_data.csv")
 result <- read.csv("result.csv")
-species_list <- read.csv("species_list.csv",row.names = 1)
+species_list <- read.csv("species_list_v3.csv",row.names = 1)
 coverage <- read.csv("coverage.csv")
 
 
 data <- data %>%
   mutate(corr_datetime = ymd_hms(corr_datetime),
-         my = dmy(my),
+         my = ymd(my),
          Call_time = hms(Call_time),
          hour = hour(Call_time))
 
