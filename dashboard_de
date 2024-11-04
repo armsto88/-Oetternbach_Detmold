@@ -11,16 +11,16 @@ library(tidyr)
 
 
 # Load the data
-data <- read.csv("master_v2.csv",row.names = 1)
+data <- read.csv("master_v4.csv",row.names = 1)
 SITE_data<- read.csv("Site_data.csv")
 result <- read.csv("result.csv")
-species_list <- read.csv("species_list.csv",row.names = 1)
+species_list <- read.csv("species_list_v3.csv",row.names = 1)
 coverage <- read.csv("coverage.csv")
 
 
 data <- data %>%
   mutate(corr_datetime = ymd_hms(corr_datetime),
-         my = dmy(my),
+         my = ymd(my),
          Call_time = hms(Call_time),
          hour = hour(Call_time))
 
@@ -62,7 +62,7 @@ ui <- navbarPage(
       border: 1px solid #3288bd; /* Blue border for a more vibrant look */
       border-radius: 7px; /* Slightly larger rounded corners */
       padding: 10px; /* Increased padding for a more spacious feel */
-      box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2); /* More prominent shadow for depth */
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); /* More prominent shadow for depth */
       margin-bottom: 10px; /* Space between boxes */
     }
     .custom-box h4 {
@@ -137,7 +137,7 @@ ui <- navbarPage(
              
              HTML("<div style='height:70px;'></div>"),
              
-            
+             
              HTML("<div style='height:60px;'></div>"),
              
              # New row for plots
@@ -168,7 +168,7 @@ ui <- navbarPage(
                    choices = list("Monat/Jahr" = "month_year", "Standort" = "site_month_year"),
                    selected = "month_year"
                  ),
-
+                 
                  plotOutput("plot2", height = "500px"),
                  HTML("<div style='height:50px;'></div>")
                  # Adjust height as neede
@@ -204,7 +204,7 @@ ui <- navbarPage(
                  div(
                    style = "margin-left: 130px;
                    margin-top: -80px;",
-                
+                   
                    box(
                      width = NULL,  # Automatic width
                      status = "primary",
@@ -228,11 +228,11 @@ ui <- navbarPage(
                                  "</div>"))
                    )
                    
-                   )
                  )
                )
+             )
            )),
-           
+  
   
   
   
@@ -324,42 +324,42 @@ ui <- navbarPage(
              sidebarLayout(
                sidebarPanel(
                  h4("Download-Optionen"),
-        #         tags$a(
-         #          href = "https://drive.google.com/file/d/1Bz1Wq30uX2ARRduz0OxOpVaw03ZmldG2/view?usp=sharing",  # Replace with your URL
-          #         target = "_blank",                  # Opens the link in a new tab
-           #        actionButton("linkButton", "Bericht herunterladen", class = "download-button")  # Button style
-             #    ),
+                 #         tags$a(
+                 #          href = "https://drive.google.com/file/d/1Bz1Wq30uX2ARRduz0OxOpVaw03ZmldG2/view?usp=sharing",  # Replace with your URL
+                 #         target = "_blank",                  # Opens the link in a new tab
+                 #        actionButton("linkButton", "Bericht herunterladen", class = "download-button")  # Button style
+                 #    ),
                  downloadButton("downloadreport","Bericht herunterladen", class = "download-button"),
                  downloadButton("downloadRData", "Rohdaten herunterladen", class = "download-button"),
                  downloadButton("downloadData", "Artenliste herunterladen", class = "download-button"),
                  br(),
                  p("Wählen Sie einen Datensatz zum Herunterladen aus.", style = "text-align: center;"),
-
+                 
                  
                  
                ),
-        mainPanel(
-          div(class = "download-box",
-              h4("Verfügbare Downloads"),
-              p("Sie können die folgenden Datensätze herunterladen:"),
-              tags$ul(class = "download-list",
-                      tags$li("Bericht: Statischer Bericht der Ergebnisse."),
-                      tags$li("Rohdaten: Enthält alle aufgezeichneten Daten."),
-                      tags$li("Artenliste: Enthält eine Liste aller Arten und der Gesamtdetektionen.")
-              )
-          ),
-          HTML("<div style='height:30px;'></div>"),  # Spacer
-          
-          div(style = "text-align: center;",  # Center the image horizontally
-              tags$img(
-                src = "UFR-vorlage-designsystem-typo-farben-V1.92.png", 
-                height = "150px", 
-                style = "margin-top: -10px;"  # You can remove margin-left and margin-right for centering
-              )
-          ),
-          HTML("<div style='height:10px;'></div>"),  # Spacer
-          tags$head(
-            tags$style(HTML("
+               mainPanel(
+                 div(class = "download-box",
+                     h4("Verfügbare Downloads"),
+                     p("Sie können die folgenden Datensätze herunterladen:"),
+                     tags$ul(class = "download-list",
+                             tags$li("Bericht: Statischer Bericht der Ergebnisse."),
+                             tags$li("Rohdaten: Enthält alle aufgezeichneten Daten."),
+                             tags$li("Artenliste: Enthält eine Liste aller Arten und der Gesamtdetektionen.")
+                     )
+                 ),
+                 HTML("<div style='height:30px;'></div>"),  # Spacer
+                 
+                 div(style = "text-align: center;",  # Center the image horizontally
+                     tags$img(
+                       src = "UFR-vorlage-designsystem-typo-farben-V1.92.png", 
+                       height = "150px", 
+                       style = "margin-top: -10px;"  # You can remove margin-left and margin-right for centering
+                     )
+                 ),
+                 HTML("<div style='height:10px;'></div>"),  # Spacer
+                 tags$head(
+                   tags$style(HTML("
       .icon-container {
         display: flex; /* Use flexbox to align items in a row */
         align-items: center; /* Center align items vertically */
@@ -373,64 +373,64 @@ ui <- navbarPage(
         margin-top: 20px; /* Space above the contact box */
       }
     "))
-          ),
-         
-          
-          # New contact box
-          div(class = "contact-box",
-              h4("Kontakt"),
-              p("Für Anfragen können Sie uns unter folgendem Kontakt erreichen:"),
-              div(class = "icon-container",
-                  style = "display: flex; justify-content:  align-items: center;",  # Flexbox for horizontal alignment
-                  tags$a(
-                    href = "mailto:thomasgarmstrong88@gmail.com",  # Mailto link
-                    tags$img(
-                      src = "mail-142.svg",  # Email icon
-                      alt = "Email",
-                      style = "width: 75px;"  # Set size inline
-                    ),
-                    style = "text-decoration: none; color: #3288bd;"  # Style for the email link
-                  ),
-                  tags$a(
-                    href = "https://www.linkedin.com/in/tom-armstrong-8788452b/",  # LinkedIn URL
-                    target = "_blank",  # Opens the link in a new tab
-                    tags$img(
-                      src = "LinkedIn_logo_initials.png",  # LinkedIn logo
-                      alt = "LinkedIn",
-                      style = "width: 60px;"  # Set size inline
-                    )
-                  ),
-                  tags$a(
-                    href = "https://github.com/armsto88/-Oetternbach_Detmold/tree/main",  # GitHub URL
-                    target = "_blank",  # Opens the link in a new tab
-                    tags$img(
-                      src = "GitHub_Logo.png",  # GitHub logo
-                      alt = "GitHub",
-                      style = "width: 90px;"  # Set size inline
-                    )
-                  )
-              )
-          ),
-          
-          
-          
-          
-          
-          HTML("<div style='height:100px;'></div>")  # Spacer
-        )))))
+                 ),
+                 
+                 
+                 # New contact box
+                 div(class = "contact-box",
+                     h4("Kontakt"),
+                     p("Für Anfragen können Sie uns unter folgendem Kontakt erreichen:"),
+                     div(class = "icon-container",
+                         style = "display: flex; justify-content:  align-items: center;",  # Flexbox for horizontal alignment
+                         tags$a(
+                           href = "mailto:thomasgarmstrong88@gmail.com",  # Mailto link
+                           tags$img(
+                             src = "mail-142.svg",  # Email icon
+                             alt = "Email",
+                             style = "width: 75px;"  # Set size inline
+                           ),
+                           style = "text-decoration: none; color: #3288bd;"  # Style for the email link
+                         ),
+                         tags$a(
+                           href = "https://www.linkedin.com/in/tom-armstrong-8788452b/",  # LinkedIn URL
+                           target = "_blank",  # Opens the link in a new tab
+                           tags$img(
+                             src = "LinkedIn_logo_initials.png",  # LinkedIn logo
+                             alt = "LinkedIn",
+                             style = "width: 60px;"  # Set size inline
+                           )
+                         ),
+                         tags$a(
+                           href = "https://github.com/armsto88/-Oetternbach_Detmold/tree/main",  # GitHub URL
+                           target = "_blank",  # Opens the link in a new tab
+                           tags$img(
+                             src = "GitHub_Logo.png",  # GitHub logo
+                             alt = "GitHub",
+                             style = "width: 90px;"  # Set size inline
+                           )
+                         )
+                     )
+                 ),
+                 
+                 
+                 
+                 
+                 
+                 HTML("<div style='height:100px;'></div>")  # Spacer
+               )))))
 
-        
-        
-        
-        
-        
+
+
+
+
+
 server <- function(input, output, session) {
   
   
   
   # Summary Statistics
   output$totalRecords <- renderValueBox({
-   valueBox(length(data$Common.name),"Erfasst",icon("database"))
+    valueBox(length(data$Common.name),"Erfasst",icon("database"))
   })
   
   output$uniqueSpecies <- renderValueBox({
@@ -493,7 +493,7 @@ server <- function(input, output, session) {
     
     # Ensure corr_datetime is parsed correctly (adjust the format as needed)
     #data <- data %>%
-     
+    
     # mutate(corr_datetime = dmy(my))  # Adjust to your datetime format
     
     # Define fixed start and end dates
@@ -509,7 +509,7 @@ server <- function(input, output, session) {
       x_var <- plot_data_summary$my  # Use 'my' for x variable
     } else if (grouping == "hour") {
       plot_data_summary <- data %>%
-       # mutate(hour_corr) %>%  # Extract hour
+        # mutate(hour_corr) %>%  # Extract hour
         group_by(hour_corr) %>%
         summarise(Detections = n(), .groups = "drop")  # Count detections
       x_var <- plot_data_summary$hour_corr  # Use 'hour_corr' for x variable
@@ -605,7 +605,7 @@ server <- function(input, output, session) {
     p
     
   })
-    
+  
   
   
   
@@ -628,7 +628,7 @@ server <- function(input, output, session) {
   })
   
   
-
+  
   
   # Monthly Plot
   # Reactive expression to aggregate data based on selection
@@ -727,7 +727,7 @@ server <- function(input, output, session) {
                 ))))
   })
   
- 
+  
   output$downloadreport <- downloadHandler(
     filename = function() {
       paste("Report", "_", Sys.Date(), "_", ".pdf", sep = "")
@@ -737,7 +737,7 @@ server <- function(input, output, session) {
       file.copy("www/Report_v3_de.pdf", file)
     }
   )
-
+  
   
   
   output$downloadData <- downloadHandler(
