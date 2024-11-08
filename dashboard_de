@@ -11,7 +11,7 @@ library(tidyr)
 
 
 # Load the data
-data <- read.csv("master_v4.csv",row.names = 1)
+data <- read.csv("master_8.11.24_v2.csv",row.names = 1)
 SITE_data<- read.csv("Site_data.csv")
 result <- read.csv("result.csv")
 species_list <- read.csv("species_list_v3.csv",row.names = 1)
@@ -105,7 +105,7 @@ ui <- navbarPage(
                  valueBoxOutput("uniqueSpecies", width = NULL)
                ),
                column(
-                 width = 2,
+                 width = 3,
                  class = "value-box-container",
                  valueBoxOutput("Speciesofconcern", width = NULL)
                )
@@ -117,18 +117,20 @@ ui <- navbarPage(
                status = "primary", 
                solidHeader = TRUE,
                class = "custom-box",
-               HTML(paste0("<div style='padding: 15px;'>",
-                           "<h3 style='color: #3288bd; text-align: left;'>Inhalt</h3>",
-                           "<p style='color: #333; line-height: 1.6; text-align: left;'>",
-                           "Diese Analyse untersucht Audiodaten, die an fünf Standorten im Oetternbach-Gebiet von März 2021 bis September 2022 aufgezeichnet wurden. ",
-                           "Die Aufnahmen wurden in einminütigen Intervallen alle zehn Minuten durchgeführt und anschließend mithilfe des BirdNet Analyzers ausgewertet. ",
-                           "Die Daten wurden verifiziert und artspezifische Vertrauensniveau festgelegt, zur Erhöhung der Genauigkeit. ",
-                           "Unter den 101 identifizierten Vogelarten sind zehn Arten von besonderem Interesse in Deutschland, hauptsächlich aufgrund anthropogener Einflüsse auf ihre Lebensräume, ",
-                           "wie Urbanisierung und störende landwirtschaftliche Praktiken. Die Region Oetternbach stellt einen wichtigen und wertvollen Lebensraum dar, ",
-                           "der die Bedeutung für bereits gefährdete Vogelarten unterstreicht. Effektive Schutzmaßnahmen sind entscheidend, um diese Lebensräume und die damit verbundene avianische Biodiversität zu bewahren.",
-                           "</p>",
-                           "</div>"))),
-             
+               HTML(paste0(
+                 '<div style="padding: 15px;">',
+                 '<h3 style="color: #3288bd; text-align: left;">Inhalt</h3>',
+                 '<p style="color: #333; line-height: 1.6; text-align: left;">',
+                 'Die vorliegende Analyse untersucht Audiodaten, die von März 2021 bis September 2022 an fünf Standorten im Gebiet Oetternbach aufgenommen wurden. ',
+                 'Die Aufnahmen wurden alle 10 Minuten in Intervallen von einer Minute durchgeführt und mit dem BirdNet Analyzer ausgewertet. ',
+                 'Die Daten wurden verifiziert und artspezifische Vertrauensniveaus ermittelt, um die Bestimmungsgenauigkeit zu erhöhen. ',
+                 'Von den 97 nachgewiesenen Vogelarten sind zehn Arten in Deutschland von besonderem naturschutzfachlichem Interesse, da sie aufgrund anthropogener Einflüsse auf ihre Lebensräume, ',
+                 'wie z.B. Bebauung und störende landwirtschaftliche Praktiken, rückläufige Bestandstrends aufweisen. ',
+                 'Das Gebiet um Oetternbach stellt einen wichtigen und wertvollen Lebensraum für bereits gefährdete Vogelarten dar.',
+                 '</p>',
+                 '</div>'
+               ))
+             ),
              # Leaflet Map
              column(
                width = 6,
@@ -178,7 +180,7 @@ ui <- navbarPage(
   ),
   
   # Page 2: Species of Concern
-  tabPanel("Besorgniserregende Arten",
+  tabPanel("Besonders schützenswerte Arten",
            
            fluidPage(
              
@@ -194,7 +196,7 @@ ui <- navbarPage(
                               }
                              "))
              ),
-             titlePanel("Besorgniserregende Arten"),
+             titlePanel("Besonders schützenswerte Arten"),
              HTML("<div style='height:50px;'></div>"),
              fluidRow(
                column(width = 4, dataTableOutput("birdTable", width = "100%")),
@@ -217,7 +219,7 @@ ui <- navbarPage(
                                  "<li><strong>Kiebitz (Vanellus vanellus)</strong><br>Bedrohungen: Gefährdet aufgrund intensiver Landwirtschaft, die Brutgebiete beeinträchtigt, von Feuchtgebietsentwässerung, die Futter- und Nistgebiete reduziert, und von durch den Klimawandel verursachten Habitatveränderungen.</li>",
                                  "<li><strong>Rotmilan (Milvus milvus)</strong><br>Bedrohungen: Zuvor gefährdet, sieht sich jetzt jedoch illegaler Vergiftung, Jagd, Habitatverlust und Gefahren durch Windkraftanlagen aufgrund von Kollisionen ausgesetzt.</li>",
                                  "<li><strong>Neuntöter (Lanius collurio)</strong><br>Bedrohungen: Rückläufige Populationen aufgrund von Agrarintensivierung, Verlust von Wiesen, Entfernung von Hecken und durch den Klimawandel beeinträchtigte Beutetilgung und Wanderungsmuster.</li>",
-                                 "<li><strong>Eurasischer Penduline (Remiz pendulinus)</strong><br>Bedrohungen: Nah gefährdet aufgrund von Feuchtgebietsentwässerung, Veränderungen an Uferbereichen und Zerstörung des Lebensraums durch Landwirtschaft und städtische Entwicklung.</li>",
+                                 "<li><strong>Beutelmeise (Remiz pendulinus)</strong><br>Bedrohungen: Nah gefährdet aufgrund von Feuchtgebietsentwässerung, Veränderungen an Uferbereichen und Zerstörung des Lebensraums durch Landwirtschaft und städtische Entwicklung.</li>",
                                  "<li><strong>Kleinspecht (Dryobates minor)</strong><br>Bedrohungen: Verwundbar aufgrund des Verlusts reifer Wälder und Totholz, die für Nist- und Nahrungsbeschaffung wichtig sind, verschärft durch Waldbewirtschaftungspraktiken und städtische Expansion.</li>",
                                  "<li><strong>Schwarzer Milan (Milvus migrans)</strong><br>Bedrohungen: Obwohl relativ stabil, sieht er sich Bedrohungen durch Vergiftung, Verschmutzung, Habitatveränderungen, illegale Verfolgung und Kollisionen mit Windturbinen ausgesetzt.</li>",
                                  "<li><strong>Kranich (Grus grus)</strong><br>Bedrohungen: Verlust des Lebensraums durch Feuchtgebietsentwässerung, menschliche Störungen während der Brutzeit und veränderte Landnutzung. Der Klimawandel beeinflusst Migrationsrouten und -zeiten.</li>",
@@ -257,14 +259,14 @@ ui <- navbarPage(
             multiple = TRUE
           ),
           
-          selectInput("agg_type", "Gruppierung:", choices = c("Monat", "Jahr"),selected = "Monat"),
+          selectInput("agg_type", "Gruppierung:", choices = c("Monat", "Jahr"), selected = "Monat"),
           
           # Monthly Plot
-          plotOutput("monthlyPlot", height = "350px"),  # Adjust height if needed
+          plotOutput("monthlyPlot", height = "350px"),
           HTML("<div style='height:30px;'></div>"),
           
           # Hourly Plot
-          plotOutput("hourlyPlot", height = "350px")  # Adjust height if needed
+          plotOutput("hourlyPlot", height = "350px")
         ),
         
         # Right column for data table
@@ -272,11 +274,41 @@ ui <- navbarPage(
           width = 6,
           
           # Data Table Output
-          dataTableOutput("speciesTable")
+          dataTableOutput("speciesTable"),
+          
+          # Spacer for visual separation
+          HTML("<div style='height: 200px;'></div>")
+        )
+      ),
+      
+      # Full-width Disclaimer Box
+      fluidRow(
+        div(
+          style = "padding: 20px; text-align: left; margin-left: 200px;",  # Center text inside the full-width box
+          box(
+            width = 10,  # Full width of the page
+            status = "primary",
+            solidHeader = TRUE,
+            class = "custom-box",
+            style = "padding: 15px; line-height: 1.6;",  # Increased padding and line height
+            HTML(paste0(
+              "<div>",
+              "<h4 style='color: #3288bd; margin-bottom: 10px;'>Haftungsausschluss</h4>",
+              "<p style='margin-bottom: 5px;'>Dies sind die ersten Ergebnisse einer laufenden Studie.</p>",
+              "<p style='margin-bottom: 5px;'>Die in diesem Projekt klassifizierten Arten können aufgrund von Ungenauigkeiten in den AI-Klassifizierungsmodellen fehlerhaft sein.</p>",
+              "<p style='margin-bottom: 5px;'>Das Vorkommen jeder identifizierten Art ist durch die manuelle Überprüfung mindestens einer entsprechenden Tonaufnahme belegt.</p>",
+              "<p style='margin-bottom: 5px;'>Dennoch sollten die Ergebnisse mit Vorsicht betrachtet werden, insbesondere für Arten, die selten in unseren Aufzeichnungen gefunden wurden.</p>",
+              "<p style='margin-bottom: 5px;'>Es ist sehr unwahrscheinlich, dass Arten, von denen nur vereinzelt Gesänge und Rufe gefunden wurden, die Flächen dauerhaft als Lebensraum und zur Fortpflanzung nutzen.</p>",
+              "<p style='margin-bottom: 5px;'>Andererseits sind auch zeitweilig genutzte Rast- oder Nahrungshabitate im Lebenszyklus vieler Arten wichtig und insbesondere für Zugvögel unverzichtbar.</p>",
+              "<p>Weitere Erhebungen werden die Liste der Arten, die die Flächen regelmäßig nutzen, erweitern und ihre Zuverlässigkeit verbessern.</p>",
+              "</div>"
+            ))
+          )
         )
       )
     )
   ),
+  
   
   
   # Page 4: Downloads
@@ -332,6 +364,9 @@ ui <- navbarPage(
                  downloadButton("downloadreport","Bericht herunterladen", class = "download-button"),
                  downloadButton("downloadRData", "Rohdaten herunterladen", class = "download-button"),
                  downloadButton("downloadData", "Artenliste herunterladen", class = "download-button"),
+                 downloadButton("downloadaudio", "Audio Proben herunterladen", class = "download-button"),
+                 
+
                  br(),
                  p("Wählen Sie einen Datensatz zum Herunterladen aus.", style = "text-align: center;"),
                  
@@ -345,7 +380,9 @@ ui <- navbarPage(
                      tags$ul(class = "download-list",
                              tags$li(tags$strong("Bericht:"), "Statischer Bericht der Ergebnisse."),
                              tags$li(tags$strong("Rohdaten:"), "Enthält alle aufgezeichneten Daten."),
-                             tags$li(tags$strong("Artenliste:"), "Enthält eine Liste aller Arten und der Gesamtdetektionen.")
+                             tags$li(tags$strong("Artenliste:"), "Enthält eine Liste aller Arten und der Gesamtdetektionen."),
+                             tags$li(tags$strong("Audio Proben:"), "Audio-Proben für besonders schützenswerte Arten.")
+                             
                      )
                  ),
                  HTML("<div style='height:30px;'></div>"),  # Spacer
@@ -381,16 +418,35 @@ ui <- navbarPage(
                      h4("Kontakt"),
                      p("Für Anfragen können Sie uns unter folgendem Kontakt erreichen:"),
                      div(class = "icon-container",
-                         style = "display: flex; justify-content:  align-items: center;",  # Flexbox for horizontal alignment
+                         style = "display: flex; align-items: center;",  # Flexbox for vertical alignment
                          tags$a(
-                           href = "mailto:thomasgarmstrong88@gmail.com",  # Mailto link
+                           href = "mailto:sandra.mueller@biologie.uni-freiburg.de",  # Mailto link
                            tags$img(
-                             src = "mail-142.svg",  # Email icon
+                             src = "mail-142.svg",  # First email icon
                              alt = "Email",
                              style = "width: 75px;"  # Set size inline
                            ),
                            style = "text-decoration: none; color: #3288bd;"  # Style for the email link
                          ),
+                         tags$span(style = "margin-left: 10px; font-size: 16px;", "Sandra Müller"),  # Text next to the first email icon
+                     ),
+                     # Add another email icon with text
+                     div(class = "icon-container",
+                         style = "display: flex; align-items: center; margin-top: 10px;",  # Flexbox for horizontal alignment
+                         tags$a(
+                           href = "mailto:thomasgarmstrong88@gmail.com",  # Second mailto link
+                           tags$img(
+                             src = "mail-142.svg",  # Second email icon
+                             alt = "Email",
+                             style = "width: 75px;"  # Set size inline
+                           ),
+                           style = "text-decoration: none; color: #3288bd;"  # Style for the email link
+                         ),
+                         tags$span(style = "margin-left: 10px; font-size: 16px;", "Tom Armstrong")  # Text next to the second email icon
+                     ),
+                     # LinkedIn and GitHub icons in a row
+                     div(class = "icon-container",
+                         style = "display: flex; justify-content: center; margin-top: 10px;",  # Center the icons
                          tags$a(
                            href = "https://www.linkedin.com/in/tom-armstrong-8788452b/",  # LinkedIn URL
                            target = "_blank",  # Opens the link in a new tab
@@ -411,6 +467,7 @@ ui <- navbarPage(
                          )
                      )
                  ),
+                 
                  
                  
                  
@@ -451,7 +508,7 @@ server <- function(input, output, session) {
   )
   
   output$Speciesofconcern <- renderValueBox({
-    valueBox(length(species_of_concern), "Besorgniserregende Arten", icon = icon("exclamation-triangle"))
+    valueBox(length(species_of_concern), "Besonders schützenswerte Arten", icon = icon("exclamation-triangle"))
   })
   
   # Data Preview Table
@@ -756,7 +813,18 @@ server <- function(input, output, session) {
     content = function(file) {
       write.csv(data, file = file)
     }
+    
   )
+  output$downloadaudio <- downloadHandler(
+    filename = function() { 
+      paste("Audio_Proben","_", Sys.Date(),"_", ".zip", sep = "") 
+    },
+    content = function(file) {
+      # Copy the report from the 'www' directory to the download location
+      file.copy("www/Besonders_schützenswerte_Arten_samples.zip", file)
+    }
+  )
+  
 }
 
 shinyApp(ui, server)
