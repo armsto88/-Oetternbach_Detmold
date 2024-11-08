@@ -787,11 +787,11 @@ server <- function(input, output, session) {
   
   output$downloadreport <- downloadHandler(
     filename = function() {
-      paste("Report", "_", Sys.Date(), "_", ".pdf", sep = "")
+      paste("Bericht", "_", Sys.Date(), "_", ".pdf", sep = "")
     },
     content = function(file) {
       # Copy the report from the 'www' directory to the download location
-      file.copy("www/Report_v4_de.pdf", file)
+      file.copy("www/Bericht_de.pdf", file)
     }
   )
   
