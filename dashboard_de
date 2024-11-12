@@ -11,9 +11,9 @@ library(tidyr)
 
 
 # Load the data
-data <- read.csv("master_8.11.24_v2.csv",row.names = 1)
+data <- read.csv("master_12.11.24.csv",row.names = 1)
 SITE_data<- read.csv("Site_data.csv")
-result <- read.csv("result.csv")
+result <- read.csv("Species_of_concern_12.11.24.csv")
 species_list <- read.csv("species_list_v3.csv",row.names = 1)
 coverage <- read.csv("coverage.csv")
 
@@ -124,7 +124,7 @@ ui <- navbarPage(
                  'Die vorliegende Analyse untersucht Audiodaten, die von März 2021 bis September 2022 an fünf Standorten im Gebiet Oetternbach aufgenommen wurden. ',
                  'Die Aufnahmen wurden alle 10 Minuten in Intervallen von einer Minute durchgeführt und mit dem BirdNet Analyzer ausgewertet. ',
                  'Die Daten wurden verifiziert und artspezifische Vertrauensniveaus ermittelt, um die Bestimmungsgenauigkeit zu erhöhen. ',
-                 'Von den 97 nachgewiesenen Vogelarten sind zehn Arten in Deutschland von besonderem naturschutzfachlichem Interesse, da sie aufgrund anthropogener Einflüsse auf ihre Lebensräume, ',
+                 'Von den 84 nachgewiesenen Vogelarten sind zehn Arten in Deutschland von besonderem naturschutzfachlichem Interesse, da sie aufgrund anthropogener Einflüsse auf ihre Lebensräume, ',
                  'wie z.B. Bebauung und störende landwirtschaftliche Praktiken, rückläufige Bestandstrends aufweisen. ',
                  'Das Gebiet um Oetternbach stellt einen wichtigen und wertvollen Lebensraum für bereits gefährdete Vogelarten dar.',
                  '</p>',
@@ -205,7 +205,7 @@ ui <- navbarPage(
                  width = 8,
                  div(
                    style = "margin-left: 130px;
-                   margin-top: -80px;",
+                   margin-top: -70px;",
                    
                    box(
                      width = NULL,  # Automatic width
@@ -218,12 +218,12 @@ ui <- navbarPage(
                                  "<ul style='list-style-type: disc; padding-left: 20px;'>",  # Added padding to list
                                  "<li><strong>Kiebitz (Vanellus vanellus)</strong><br>Bedrohungen: Gefährdet aufgrund intensiver Landwirtschaft, die Brutgebiete beeinträchtigt, von Feuchtgebietsentwässerung, die Futter- und Nistgebiete reduziert, und von durch den Klimawandel verursachten Habitatveränderungen.</li>",
                                  "<li><strong>Rotmilan (Milvus milvus)</strong><br>Bedrohungen: Zuvor gefährdet, sieht sich jetzt jedoch illegaler Vergiftung, Jagd, Habitatverlust und Gefahren durch Windkraftanlagen aufgrund von Kollisionen ausgesetzt.</li>",
-                                 "<li><strong>Neuntöter (Lanius collurio)</strong><br>Bedrohungen: Rückläufige Populationen aufgrund von Agrarintensivierung, Verlust von Wiesen, Entfernung von Hecken und durch den Klimawandel beeinträchtigte Beutetilgung und Wanderungsmuster.</li>",
-                                 "<li><strong>Beutelmeise (Remiz pendulinus)</strong><br>Bedrohungen: Nah gefährdet aufgrund von Feuchtgebietsentwässerung, Veränderungen an Uferbereichen und Zerstörung des Lebensraums durch Landwirtschaft und städtische Entwicklung.</li>",
+                                 #"<li><strong>Neuntöter (Lanius collurio)</strong><br>Bedrohungen: Rückläufige Populationen aufgrund von Agrarintensivierung, Verlust von Wiesen, Entfernung von Hecken und durch den Klimawandel beeinträchtigte Beutetilgung und Wanderungsmuster.</li>",
+                                 #"<li><strong>Beutelmeise (Remiz pendulinus)</strong><br>Bedrohungen: Nah gefährdet aufgrund von Feuchtgebietsentwässerung, Veränderungen an Uferbereichen und Zerstörung des Lebensraums durch Landwirtschaft und städtische Entwicklung.</li>",
                                  "<li><strong>Kleinspecht (Dryobates minor)</strong><br>Bedrohungen: Verwundbar aufgrund des Verlusts reifer Wälder und Totholz, die für Nist- und Nahrungsbeschaffung wichtig sind, verschärft durch Waldbewirtschaftungspraktiken und städtische Expansion.</li>",
-                                 "<li><strong>Schwarzer Milan (Milvus migrans)</strong><br>Bedrohungen: Obwohl relativ stabil, sieht er sich Bedrohungen durch Vergiftung, Verschmutzung, Habitatveränderungen, illegale Verfolgung und Kollisionen mit Windturbinen ausgesetzt.</li>",
+                                # "<li><strong>Schwarzer Milan (Milvus migrans)</strong><br>Bedrohungen: Obwohl relativ stabil, sieht er sich Bedrohungen durch Vergiftung, Verschmutzung, Habitatveränderungen, illegale Verfolgung und Kollisionen mit Windturbinen ausgesetzt.</li>",
                                  "<li><strong>Kranich (Grus grus)</strong><br>Bedrohungen: Verlust des Lebensraums durch Feuchtgebietsentwässerung, menschliche Störungen während der Brutzeit und veränderte Landnutzung. Der Klimawandel beeinflusst Migrationsrouten und -zeiten.</li>",
-                                 "<li><strong>Sumpfrohrsänger (Acrocephalus palustris)</strong><br>Bedrohungen: Unter Druck aufgrund von Lebensraumdegradation, insbesondere durch Feuchtgebietsentwässerung und landwirtschaftliche Umwandlung, sowie durch Störungen durch extremen Wetterereignisse, die mit dem Klimawandel verbunden sind.</li>",
+                                 #"<li><strong>Sumpfrohrsänger (Acrocephalus palustris)</strong><br>Bedrohungen: Unter Druck aufgrund von Lebensraumdegradation, insbesondere durch Feuchtgebietsentwässerung und landwirtschaftliche Umwandlung, sowie durch Störungen durch extremen Wetterereignisse, die mit dem Klimawandel verbunden sind.</li>",
                                  "<li><strong>Wachtel (Coturnix coturnix)</strong><br>Bedrohungen: Nah gefährdet aufgrund intensiver Landwirtschaft, Pestizideinsatz und Habitatverlust, die den Bruterfolg beeinträchtigen. Der Klimawandel könnte auch die Wanderungsmuster beeinflussen.</li>",
                                  "<li><strong>Eurasische Feldlerche (Alauda arvensis)</strong><br>Bedrohungen: Verwundbar aufgrund der Agrarintensivierung, die Nistflächen und Nahrungsquellen reduziert, sowie der Auswirkungen von Pestiziden auf Insektenpopulationen.</li>",
                                  "</ul>",
@@ -497,12 +497,8 @@ server <- function(input, output, session) {
   species_of_concern <- c(
     "Northern Lapwing",
     "Red Kite",
-    "Red-backed Shrike",
-    "Eurasian Penduline-Tit",
     "Lesser Spotted Woodpecker",
-    "Black Kite",
     "Common Crane",
-    "Marsh Warbler",
     "Common Quail",
     "Eurasian Skylark"
   )
@@ -791,7 +787,7 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       # Copy the report from the 'www' directory to the download location
-      file.copy("www/Bericht_de.pdf", file)
+      file.copy("www/Bericht_12.11.24.pdf", file)
     }
   )
   
@@ -821,7 +817,7 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       # Copy the report from the 'www' directory to the download location
-      file.copy("www/Besonders_schützenswerte_Arten_samples.zip", file)
+      file.copy("www/Arten_samples.zip", file)
     }
   )
   
