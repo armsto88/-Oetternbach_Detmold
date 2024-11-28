@@ -7,13 +7,16 @@ library(DT)
 library(shinydashboard)
 library(ggthemes)
 library(tidyr)
+library(DT)
+library(seewave)
+library(tuneR)
 
 
 
 # Load the data
-data <- read.csv("master_12.11.24.csv",row.names = 1)
-SITE_data<- read.csv("Site_data.csv")
-result <- read.csv("Species_of_concern_12.11.24.csv")
+data <- read.csv("Master_V2_27.11.csv",row.names = 1)
+#SITE_data<- read.csv("Site_data.csv")
+#result <- read.csv("Species_of_concern_12.11.24.csv")
 species_list <- read.csv("species_list_v3.csv",row.names = 1)
 coverage <- read.csv("coverage.csv")
 
@@ -23,6 +26,12 @@ data <- data %>%
          my = ymd(my),
          Call_time = hms(Call_time),
          hour = hour(Call_time))
+
+Artenliste<-data%>%
+  select(Artname,Scientific.name)%>%
+  rename(Wissenschaftlicher.Name = Scientific.name)%>%
+  group_by(Artname,Wissenschaftlicher.Name)%>%
+  summarise(Erfassung = n())
 
 
 
@@ -88,6 +97,13 @@ ui <- navbarPage(
     text-align: center; /* Center align text below the icon */
     padding: 10px; /* Add padding around the value box */
 }
+
+#map {
+border: 2px solid #cccccc;  /* Light gray border */
+box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
+  border-radius: 10px;  /* Rounded corners */
+  }
+
   "))
              ),
              titlePanel("Übersicht"),
@@ -124,7 +140,7 @@ ui <- navbarPage(
                  'Die vorliegende Analyse untersucht Audiodaten, die von März 2021 bis September 2022 an fünf Standorten im Gebiet Oetternbach aufgenommen wurden. ',
                  'Die Aufnahmen wurden alle 10 Minuten in Intervallen von einer Minute durchgeführt und mit dem BirdNet Analyzer ausgewertet. ',
                  'Die Daten wurden verifiziert und artspezifische Vertrauensniveaus ermittelt, um die Bestimmungsgenauigkeit zu erhöhen. ',
-                 'Von den 84 nachgewiesenen Vogelarten sind zehn Arten in Deutschland von besonderem naturschutzfachlichem Interesse, da sie aufgrund anthropogener Einflüsse auf ihre Lebensräume, ',
+                 'Von den 77 nachgewiesenen Vogelarten sind zehn Arten in Deutschland von besonderem naturschutzfachlichem Interesse, da sie aufgrund anthropogener Einflüsse auf ihre Lebensräume, ',
                  'wie z.B. Bebauung und störende landwirtschaftliche Praktiken, rückläufige Bestandstrends aufweisen. ',
                  'Das Gebiet um Oetternbach stellt einen wichtigen und wertvollen Lebensraum für bereits gefährdete Vogelarten dar.',
                  '</p>',
@@ -181,59 +197,60 @@ ui <- navbarPage(
   
   # Page 2: Species of Concern
   tabPanel("Besonders schützenswerte Arten",
-           
            fluidPage(
-             
              tags$head(
                tags$style(HTML("
-                              .dataTable {
-                                font-size: 12px; /* Adjust font size */
-                                margin: 0; /* Remove default margin */
-                                padding: 5px; /* Reduce padding */
-                              }
-                              .dataTable th, .dataTable td {
-                                padding: 2px; /* Further reduce cell padding */
-                              }
-                             "))
+        /* Adjust table styling */
+        .dataTable {
+          font-size: 12px;
+          margin: 0;
+          padding: 5px;
+        }
+        .dataTable th, .dataTable td {
+          padding: 4px;  /* Slightly increased for readability */
+        }
+
+        /* Styling for iframe box */
+        .iframe-box {
+          background-color: #f9f9f9;  /* Light background */
+          border: 1px solid #ccc;  /* Border around iframe */
+          padding: 10px;
+          border-radius: 8px;  /* Rounded corners */
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);  /* Light shadow */
+          height: 500px;  /* Fixed height */
+        }
+        
+        /* Adjust row and column spacing */
+        .shiny-column {
+          margin-top: 10px;
+        }
+      "))
              ),
+             
              titlePanel("Besonders schützenswerte Arten"),
-             HTML("<div style='height:50px;'></div>"),
+             
+             # Adjust spacing between title and content
+             HTML("<div style='height:70px;'></div>"),
+             
              fluidRow(
-               column(width = 4, dataTableOutput("birdTable", width = "100%")),
-               HTML("<div style='height:90px;'></div>"),
+               # Left Column for the Table
                column(
-                 width = 8,
+                 width = 5,  # Adjusted width
+                 DTOutput("birdTable", width = "100%")
+               ),
+               
+               # Right Column for the Iframe Box
+               column(
+                 width = 7,  # Adjusted width
                  div(
-                   style = "margin-left: 130px;
-                   margin-top: -70px;",
-                   
-                   box(
-                     width = NULL,  # Automatic width
-                     status = "primary",
-                     solidHeader = TRUE,
-                     class = "custom-box",
-                     style = "padding: 15px; line-height: 1.6;",  # Increased padding and line height
-                     HTML(paste0("<div>",
-                                 #"<h4 style='color: #3288bd; margin-bottom: 10px;'>Arten von besonderem Interesse</h4>",
-                                 "<ul style='list-style-type: disc; padding-left: 20px;'>",  # Added padding to list
-                                 "<li><strong>Kiebitz (Vanellus vanellus)</strong><br>Bedrohungen: Gefährdet aufgrund intensiver Landwirtschaft, die Brutgebiete beeinträchtigt, von Feuchtgebietsentwässerung, die Futter- und Nistgebiete reduziert, und von durch den Klimawandel verursachten Habitatveränderungen.</li>",
-                                 "<li><strong>Rotmilan (Milvus milvus)</strong><br>Bedrohungen: Zuvor gefährdet, sieht sich jetzt jedoch illegaler Vergiftung, Jagd, Habitatverlust und Gefahren durch Windkraftanlagen aufgrund von Kollisionen ausgesetzt.</li>",
-                                 #"<li><strong>Neuntöter (Lanius collurio)</strong><br>Bedrohungen: Rückläufige Populationen aufgrund von Agrarintensivierung, Verlust von Wiesen, Entfernung von Hecken und durch den Klimawandel beeinträchtigte Beutetilgung und Wanderungsmuster.</li>",
-                                 #"<li><strong>Beutelmeise (Remiz pendulinus)</strong><br>Bedrohungen: Nah gefährdet aufgrund von Feuchtgebietsentwässerung, Veränderungen an Uferbereichen und Zerstörung des Lebensraums durch Landwirtschaft und städtische Entwicklung.</li>",
-                                 "<li><strong>Kleinspecht (Dryobates minor)</strong><br>Bedrohungen: Verwundbar aufgrund des Verlusts reifer Wälder und Totholz, die für Nist- und Nahrungsbeschaffung wichtig sind, verschärft durch Waldbewirtschaftungspraktiken und städtische Expansion.</li>",
-                                # "<li><strong>Schwarzer Milan (Milvus migrans)</strong><br>Bedrohungen: Obwohl relativ stabil, sieht er sich Bedrohungen durch Vergiftung, Verschmutzung, Habitatveränderungen, illegale Verfolgung und Kollisionen mit Windturbinen ausgesetzt.</li>",
-                                 "<li><strong>Kranich (Grus grus)</strong><br>Bedrohungen: Verlust des Lebensraums durch Feuchtgebietsentwässerung, menschliche Störungen während der Brutzeit und veränderte Landnutzung. Der Klimawandel beeinflusst Migrationsrouten und -zeiten.</li>",
-                                 #"<li><strong>Sumpfrohrsänger (Acrocephalus palustris)</strong><br>Bedrohungen: Unter Druck aufgrund von Lebensraumdegradation, insbesondere durch Feuchtgebietsentwässerung und landwirtschaftliche Umwandlung, sowie durch Störungen durch extremen Wetterereignisse, die mit dem Klimawandel verbunden sind.</li>",
-                                 "<li><strong>Wachtel (Coturnix coturnix)</strong><br>Bedrohungen: Nah gefährdet aufgrund intensiver Landwirtschaft, Pestizideinsatz und Habitatverlust, die den Bruterfolg beeinträchtigen. Der Klimawandel könnte auch die Wanderungsmuster beeinflussen.</li>",
-                                 "<li><strong>Eurasische Feldlerche (Alauda arvensis)</strong><br>Bedrohungen: Verwundbar aufgrund der Agrarintensivierung, die Nistflächen und Nahrungsquellen reduziert, sowie der Auswirkungen von Pestiziden auf Insektenpopulationen.</li>",
-                                 "</ul>",
-                                 "</div>"))
-                   )
-                   
+                   class = "iframe-box",
+                   uiOutput("webFrame")
                  )
                )
              )
-           )),
+           )
+  ),
+  
   
   
   
@@ -249,12 +266,16 @@ ui <- navbarPage(
         # Left column for selection inputs and plots
         column(
           width = 6,
+          selectInput("species", "Select Species:", choices = Artenliste$Artname),  # Dropdown menu
+          htmlOutput("audioPlayer"),
+          
+          plotOutput("spectrogram"),
           
           # Selection inputs
           selectInput(
             "speciesSelect", 
             "Art auswählen", 
-            choices = unique(data$name_german),
+            choices = unique(data$Artname),
             selected = "Kohlmeise",
             multiple = TRUE
           ),
@@ -275,6 +296,7 @@ ui <- navbarPage(
           
           # Data Table Output
           dataTableOutput("speciesTable"),
+       
           
           # Spacer for visual separation
           HTML("<div style='height: 200px;'></div>")
@@ -491,26 +513,23 @@ server <- function(input, output, session) {
   })
   
   output$uniqueSpecies <- renderValueBox({
-    valueBox(length(unique(data$name_german)), "Artnamen", icon = icon("feather"))
+    valueBox(length(unique(data$Artname)), "Artnamen", icon = icon("feather"))
   })
   
-  species_of_concern <- c(
-    "Northern Lapwing",
-    "Red Kite",
-    "Lesser Spotted Woodpecker",
-    "Common Crane",
-    "Common Quail",
-    "Eurasian Skylark"
-  )
+  species_of_concern<-data %>%
+    filter(Conservation.status %in% c("Endangered", "Heavily Endangered", "Warning")) %>%
+    summarise(total_unique_species = n_distinct(Common.name))
   
   output$Speciesofconcern <- renderValueBox({
-    valueBox(length(species_of_concern), "Besonders schützenswerte Arten", icon = icon("exclamation-triangle"))
+    valueBox(species_of_concern$total_unique_species, "Besonders schützenswerte Arten", icon = icon("exclamation-triangle"))
   })
-  
-  # Data Preview Table
-  #output$dataPreview <- renderDataTable({
-  # datatable(data)
-  #})
+
+  SITE_data<- data %>%
+    group_by(site_name) %>%
+    mutate(unique = n_distinct(Common.name)) %>%  # Count unique species per site
+    mutate(Concern = n_distinct(Common.name[Conservation.status %in% c("Endangered", "Heavily Endangered", "Warning")])) %>%  # Count unique species of concern
+    select(site_name, LAT, LNG, unique, Concern) %>%
+    distinct() 
   
   # Leaflet Map
   output$map <- renderLeaflet({
@@ -534,9 +553,10 @@ server <- function(input, output, session) {
                        options = layersControlOptions(collapsed = FALSE)  # Options to keep the control expanded
       )%>%
       
-      addMarkers(lat = ~LAT,lng = ~LNG, popup = ~paste("<b>Standortname:</b>", site_name, "<br><b>Einzigartige Arten:</b>", count,"<br><b>Besorgniserregende Arten:</b>",Species_of_concern ))
+      addMarkers(lat = ~LAT,lng = ~LNG, popup = ~paste("<b>Standortname:</b>", site_name, "<br><b>Einzigartige Arten:</b>", unique,"<br><b>Besorgniserregende Arten:</b>",Concern ))
     
   })
+  
   library(lubridate)
   library(dplyr)
   library(ggplot2)
@@ -661,25 +681,59 @@ server <- function(input, output, session) {
   
   
   
+  # Add a button column to the data
+  result <- data %>%
+    filter(Conservation.status %in% c("Endangered", "Heavily Endangered", "Warning")) %>%
+    group_by(Artname, erhaltungsstatus) %>%
+    summarise(Erfassung = length(Artname)) %>%
+    rename(
+      Erhaltungsstatus = erhaltungsstatus
+    ) %>%
+    mutate(URL = case_when(
+      Artname == "Grauschnäpper" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/grauschnaepper/",
+      Artname == "Feldlerche" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/feldlerche/",
+      Artname == "Kiebitz" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/kiebitz/",
+      Artname == "Bluthänfling" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/bluthaenfling/",
+      Artname == "Star" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/star/",
+      Artname == "Rotmilan" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/rotmilan/",
+      Artname == "Rauchschwalbe" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/rauchschwalbe/",
+      Artname == "Wachtel" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/wachtel/",
+      Artname == "Feldsperling" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/feldsperling/"
+    )) %>%
+    mutate(Button = paste0("<button class='btn btn-primary btn-sm' onclick=\"Shiny.setInputValue('selected_url', '", URL, "', {priority: 'event'})\">Offen</button>")) %>%
+    mutate(Erhaltungsstatus = factor(Erhaltungsstatus, levels = c("Stark gefährdet", "gefährdet", "Vorwarnliste"))) %>%
+    arrange(Erhaltungsstatus)
   
+  ############## TABLE ############################
   
-  result <- result %>%
-    select(Artname,Erhaltungszustand,Total.detections, Site) %>%
-    rename(Standort = Site,
-           Erfassung =Total.detections)
-  
-  output$birdTable <- renderDataTable({
-    datatable(result, escape = FALSE, 
+  output$birdTable <- renderDT({
+    datatable(result %>% select(Artname, Erhaltungsstatus, Erfassung, Button),  # Exclude the raw URL column from display
+              escape = FALSE,  # Allow HTML for buttons
+              rownames = FALSE,
+              selection = "none",  # Disable row selection
               options = list(
-                pageLength = 15,
+                pageLength = 16,
                 dom = 'tip',
                 columnDefs = list(list(
                   className = 'dt-center',
                   targets = "_all"
                 ))
-              )) 
+              ))
   })
   
+  # Observe button clicks to update the iframe
+  observeEvent(input$selected_url, {
+    output$webFrame <- renderUI({
+      tags$iframe(
+        src = input$selected_url,
+        width = "100%",
+        height = "500px",
+        style = "border:none;"
+      )
+    })
+  })
+  
+ 
   
   
   
@@ -688,13 +742,13 @@ server <- function(input, output, session) {
   aggregated_data <- reactive({
     if (input$agg_type == "Monat") {
       data %>%
-        filter(name_german %in% input$speciesSelect) %>%
-        group_by(my, name_german) %>%
+        filter(Artname %in% input$speciesSelect) %>%
+        group_by(my, Artname) %>%
         summarise(Total.detections = n(), .groups = "drop")
     } else {
       data %>%
-        filter(name_german %in% input$speciesSelect) %>%
-        group_by(Year, name_german) %>%
+        filter(Artname %in% input$speciesSelect) %>%
+        group_by(Year, Artname) %>%
         summarise(Total.detections = n(), .groups = "drop")
     }
   })
@@ -703,17 +757,13 @@ server <- function(input, output, session) {
   end_date <- as.Date("2022-10-01")
   
   
-  #filtered_data <- data %>%
-  # filter(Common.name %in% input$speciesSelect) %>%
-  #group_by(my,Common.name) %>%
-  #summarise(Total.detections = n(),.groups = "drop")
   
   output$monthlyPlot <- renderPlot({
     req(input$speciesSelect)
     
     p <- ggplot(aggregated_data(), aes(x = if (input$agg_type == "Monat") my else Year, 
                                        y = Total.detections, 
-                                       colour = name_german)) +
+                                       colour = Artname)) +
       geom_line() +
       geom_point(size = 3) +
       theme_few() +
@@ -741,11 +791,11 @@ server <- function(input, output, session) {
   output$hourlyPlot <- renderPlot({
     req(input$speciesSelect)
     filtered_data <- data %>%
-      filter(name_german %in% input$speciesSelect) %>%
-      group_by(hour_corr,name_german) %>%
+      filter(Artname %in% input$speciesSelect) %>%
+      group_by(hour_corr,Artname) %>%
       summarise(Total.detections = n(), .groups = "drop")
     
-    ggplot(filtered_data, aes(x = hour_corr, y = Total.detections, colour = name_german)) +
+    ggplot(filtered_data, aes(x = hour_corr, y = Total.detections, colour = Artname)) +
       geom_line() +
       geom_point(size = 3) +
       theme_few() +
@@ -759,26 +809,54 @@ server <- function(input, output, session) {
       scale_colour_brewer(palette = "Set2") 
   })
   
-  Artenliste<-data%>%
-    select(name_german,Scientific.name)%>%
-    rename(Artname = name_german,
-           Wissenschaftlicher.Name = Scientific.name)%>%
-    group_by(Artname,Wissenschaftlicher.Name)%>%
-    summarise(Erfassung = n())
   
-  output$speciesTable <- renderDataTable({
-    datatable(Artenliste, escape = FALSE, 
+ 
+  output$speciesTable <- renderDT({
+    datatable(Artenliste[, c("Artname", "Wissenschaftlicher.Name", "Erfassung")],  # Removed Button column
+              escape = FALSE, 
               options = list(
                 pageLength = 20,
-                #dom = 'tip',                       # 'tip' format hides unnecessary elements like filter and length options
-                #scrollX = T,                    # Enables horizontal scrolling
-                #scrollY = "500px",                 # Fixed height for vertical scrolling
-                #autoWidth = F,                  # Automatically adjusts column widths
                 columnDefs = list(list(
-                  className = 'dt-center',         # Center-aligns all content
-                  targets = "_all"                 # Applies to all columns
-                ))))
+                  className = 'dt-center', 
+                  targets = "_all"  # Centers all columns
+                ))
+              ))
   })
+  
+  # Reactive to get the selected species' folder and wav file path
+  selected_wav_path <- reactive({
+    species_name <- input$species
+    folder_path <- file.path("www","Arten_samples", "Arten zur Überprüfung", species_name)
+    wav_files <- list.files(folder_path, pattern = "\\.WAV$", full.names = TRUE)
+    
+    if (length(wav_files) > 0) {
+      return(wav_files[1])  # Return the first .WAV file found
+    } else {
+      return(NULL)
+    }
+  })
+  
+  # Render the spectrogram when a species is selected
+  output$spectrogram <- renderPlot({
+    wav_file <- selected_wav_path()
+    if (!is.null(wav_file)) {
+      audio_data <- readWave(wav_file)
+      spectro(audio_data, main = paste("Spectrogram of", input$species))  # Create spectrogram
+    } else {
+      plot(1, type = "n", xlab = "", ylab = "", main = "No WAV file found for selected species")
+    }
+  })
+  
+  output$audioPlayer <- renderUI({
+    wav_file <- selected_wav_path()
+    if (!is.null(wav_file)) {
+      # Ensure the path used in the audio player is relative to 'www'
+      tags$audio(src = substr(wav_file, 5, nchar(wav_file)), type = "audio/wav", controls = TRUE)  # Strip 'www/' from the path
+    } else {
+      "No audio file available"
+    }
+  })
+
   
   
   output$downloadreport <- downloadHandler(
