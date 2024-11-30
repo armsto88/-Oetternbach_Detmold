@@ -12,6 +12,8 @@ library(seewave)
 library(tuneR)
 library(shinyjs)
 library(shinyWidgets)
+library(shinythemes)
+
 
 
 
@@ -50,12 +52,14 @@ ui <- navbarPage(
     ),
     "Oetternbach, Detmold - Bioakustik-Daten"
   ),
+  #theme = shinytheme("simplex"),
   tags$style(HTML("
         .navbar {
-            padding: 15px;
+            padding: 30px;
              text-align: center;
         }
     ")),
+  
   
   
   # Page 1: Overview
@@ -825,14 +829,14 @@ server <- function(input, output, session) {
       Artname == "Wachtel" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/wachtel/",
       Artname == "Feldsperling" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/feldsperling/"
     )) %>%
-    mutate(Button = paste0("<button class='btn btn-primary btn-sm' onclick=\"Shiny.setInputValue('selected_url', '", URL, "', {priority: 'event'})\">Offen</Info.>")) %>%
+    mutate(Info. = paste0("<button class='btn btn-info btn-sm' onclick=\"Shiny.setInputValue('selected_url', '", URL, "', {priority: 'event'})\">Offen</Info.>")) %>%
     mutate(Erhaltungsstatus = factor(Erhaltungsstatus, levels = c("Stark gefährdet", "gefährdet", "Vorwarnliste"))) %>%
     arrange(Erhaltungsstatus)
   
   ############## TABLE ############################
   
   output$birdTable <- renderDT({
-    datatable(result %>% select(Artname, Erhaltungsstatus, Erfassung, Button),  # Exclude the raw URL column from display
+    datatable(result %>% select(Artname, Erhaltungsstatus, Erfassung, Info.),  # Exclude the raw URL column from display
               escape = FALSE,  # Allow HTML for buttons
               rownames = FALSE,
               selection = "none",  # Disable row selection
@@ -1048,29 +1052,58 @@ observeEvent(input$resetButton, {
     wav_file <- selected_wav_path()
     
     if (!is.null(wav_file)) {
-      # Load the full audio data
-      audio_data <- readWave(wav_file)
+      # Read the audio file
+      audio_data <- tryCatch({
+        readWave(wav_file)
+      }, error = function(e) {
+        message("Error reading WAV file: ", e$message)
+        return(NULL)
+      })
       
-      # Get the selected time range from sliderValues
-      time_Range <- sliderValues$time  # In seconds
+      if (is.null(audio_data)) {
+        return("Error loading audio file.")
+      }
       
-      # Convert time range to sample range
-      start_sample <- floor(time_Range[1] * audio_data@samp.rate) + 1  # Ensure valid index
+      # Retrieve the time range from slider
+      time_Range <- sliderValues$time
+      start_sample <- max(1, floor(time_Range[1] * audio_data@samp.rate))
       end_sample <- min(floor(time_Range[2] * audio_data@samp.rate), length(audio_data@left))
       
-      # Extract the selected audio segment
-      audio_segment <- audio_data[start_sample:end_sample]
-      
-      # Save the audio segment in the 'www' directory
-      temp_file <- file.path(tempdir(), "temp_audio.wav")
-      writeWave(audio_segment, temp_file)
-      
-      # Create the audio player for the extracted segment
-      tags$audio(src = "temp_audio.wav", type = "audio/wav", controls = TRUE)
+      if (start_sample <= end_sample) {
+        # Extract the segment
+        audio_segment <- audio_data[start_sample:end_sample]
+        
+        # Check if audio segment is valid
+        if (length(audio_segment@left) == 0) {
+          return("Invalid audio segment.")
+        }
+        
+        # Define the full path for the temporary file in the 'www' folder
+        temp_file <- file.path("www", "temp_audio.wav")
+        
+        # Clear the old temporary file if it exists
+        if (file.exists(temp_file)) {
+          unlink(temp_file)  # Remove the old temp file
+        }
+        
+        # Save the segment to the 'www' directory
+        tryCatch({
+          writeWave(audio_segment, temp_file)
+        }, error = function(e) {
+          message("Error writing audio file: ", e$message)
+          return("Error writing audio file.")
+        })
+        
+        # Output the audio player with unique query parameter to force refresh
+        return(tags$audio(src = paste0("temp_audio.wav?v=", Sys.time()), controls = TRUE))
+      } else {
+        return("Invalid time range selected.")
+      }
     } else {
-      "No audio file available"
+      return("No audio available.")
     }
   })
+  
   
   
   
