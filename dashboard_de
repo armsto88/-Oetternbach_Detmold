@@ -52,7 +52,7 @@ ui <- navbarPage(
     ),
     "Oetternbach, Detmold - Bioakustik-Daten"
   ),
-  #theme = shinytheme("simplex"),
+  theme = shinytheme("simplex"),
   tags$style(HTML("
         .navbar {
             padding: 30px;
