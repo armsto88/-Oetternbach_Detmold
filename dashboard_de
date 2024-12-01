@@ -348,6 +348,7 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
       .slider-vertical .irs-slider {
         height: 800px;  /* Adjust slider's thumb height */
       }
+      
 
     "))
       ),
@@ -393,10 +394,12 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
       ),
       
       fluidRow(
-        HTML("<div style='height: 50px;'></div>"),
+        HTML("<div style='height: 30px;'></div>"),
         selectizeInput("species", "Art auswählen", choices = Artenliste$Artname), 
-        HTML("<div style='height: 10px;'></div>"), 
+        #HTML("<div style='height: 10px;'></div>"), 
         div(class = "centered", htmlOutput("audioPlayer")),
+        
+   
         HTML("<div style='height: 4px;'></div>"),
         
         useShinyjs()
@@ -404,49 +407,51 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
       
       fluidRow(
         column(
-          width = 2,
+          width = 1,
           HTML("<div style='height: 0px;'></div>"),# Adjusted the width of the slider column
           noUiSliderInput("freqRange","",min = 0, max = 15, value = c(0,15), step = 1, 
-                                    width = "100%",orientation = "vertical",
+                                    width = "100%",orientation = "vertical",tooltips = T,
                           height = "310px",direction = "rtl",color ="#3288bd"),
-           # div(
-          #  class = "slider-vertical",
-           # sliderInput("freqRange", "kHz",  # You can add a label if necessary
-            #            min = 0, max = 15, value = c(0, 15), step = 1, 
-             #           width = "100%")  # Optional: Makes the slider animation smoother
-         # ),
-          style = "height: 250px; margin-left: -50px;"  # Adjusted column height to support the slider length
+          
+          style = "height: 100px; margin-left: -10px;"  # Adjusted column height to support the slider length
         ),
         
         column(
-          width = 10,  # Spectrogram column
+          width = 11,  # Spectrogram column
           div(
             style = "display: flex; justify-content: center;",  # Center the plot
             plotOutput("spectrogram", height = "350px", width = "100%")  # Adjust the width to 100% of the column
           ),
-          style = "margin-left: -30px;",
+          
+          
+          style = "margin-left: -10px;",
           
            div(
-             style = "display: flex; flex-direction: column; align-items: center; width: 100%;margin-left: 5px;",
+             style = "display: flex; flex-direction: column; align-items: center; width: 100%;margin-left: 5px;margin-top: -10px;",
           
           
-          HTML("<div style='height: 10px;'></div>"),
+         # HTML("<div style='height: 10px;'></div>"),
           
              noUiSliderInput("timeRange", "", 
-                         min = 0, max = 60, value = c(0, 60),step = 2, height = "17px",width = "94%",color = "#3288bd"),
+                         min = 0, max = 60, value = c(0, 60),step = 2, height = "17px",width = "95%",color = "#3288bd"),
             
          
           
            )
         )
       ),
-    #  column(6, actionButton("applyButton", "Übernehmen", 
-     #                        style = "background-color: red !important; color: white !important; 
-      #                            border: none; padding: 10px 20px; font-size: 16px;margin-left: 450px;")),
-  #  column(6, actionButton("resetButton", "Zurücksetzen", 
-   #                        style = "background-color: red !important; color: white !important;  
-    #                              border: none; padding: 10px 20px; font-size: 16px;margin-left: -5px;"))
-      HTML("<div style='height: 10px;'></div>"),
+      fluidRow(column
+               (width = 12,align = "center",
+                 radioButtons("contrastOption", "",
+                              choices = list("Niedriger Kontrast" = "low",
+                                             " Mittlerer Kontrast" = "medium",
+                                             "Hoher Kontrast" = "high"),
+                              selected = "medium",inline = T)),
+               style = "padding: 0px; margin-bottom: 0px;"
+               
+      ),
+
+      HTML("<div style='height: 2px;'></div>"),
 
 
   fluidRow(
@@ -454,26 +459,17 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
                            class = "btn btn-success custom-btn", 
                            style = "font-size: 14px; padding: 5px 10px; margin-left: 500px;")),
     column(6, actionButton("resetButton", "Zurücksetzen", 
-                           class = "btn btn-danger", 
+                           class = "btn btn-secondary", 
                            style = "font-size: 14px; padding: 5px 10px; margin-left: -5px;"))
+    
+    
   ),
+  
+
   
     
        fluidRow(
-        
-      # div(
-      #   style = "display: flex; flex-direction: column; align-items: center; width: 100%;margin-left: 25px;",
-         
-         
-         #HTML("<div style='height: 10px;'></div>"),
-         
-     #    noUiSliderInput("timeRange", "", 
-      #               min = 0, max = 60, value = c(0, 60),step = 2, height = "17px",width = "76%",color = "#3288bd"),
-       #  sliderInput("freqRange", "Frequenzbereich auswählen (kHz):", 
-           #          min = 0, max = 15, value = c(0, 15),step = 1, width = "50%")
-         # Add the commit button
-         
-    #   ),
+      
      
        
        HTML("<div style='height: 30px;'></div>"),
@@ -1047,22 +1043,29 @@ observeEvent(input$resetButton, {
   updateSliderInput(session, "timeRange", value = default_time)
   updateSliderInput(session, "freqRange", value = default_freq)
 })
-  # Render the spectrogram when a species is selected
+ 
+
   
   
   debounced_time <- debounce(reactive({ input$timeRange }), 300)
   debounced_freq <- debounce(reactive({ input$freqRange }), 300)
   
+  # Reactive expression to determine collevels based on user selection
+  collevels <- reactive({
+    switch(input$contrastOption,
+           "low" = seq(-100, 0, by = 10),
+           "medium" = seq(-50, 0, by = 5),
+           "high" = seq(-30, 0, by = 2))
+  })
+  
   output$spectrogram <- renderPlot({
     shinyjs::show("loadingMessageTop")
-    #shinyjs::show("spectrogramLoader")
+    
     Sys.sleep(3) 
     wav_file <- selected_wav_path()
     
-    
     if (!is.null(wav_file)) {
-      audio_data <- (readWave(wav_file))
-     
+      audio_data <- readWave(wav_file)
       
       # Set the margins before plotting
       par(mar = c(3, 3, 2, 2))  # Adjust the margins (bottom, left, top, right)
@@ -1070,19 +1073,14 @@ observeEvent(input$resetButton, {
       freq_Range <- sliderValues$freq
       time_Range <- sliderValues$time
       
-   
-      
-      
+      # Generate the spectrogram
       spectro(audio_data,
               palette = topo.colors,
-              collevels = seq(-50, 0, 5),
-              #ovlp = 75,
-              scale = F,
+              collevels = collevels(),  # Reactive collevels based on user input
+              scale = FALSE,
               tlab = "",
               flab = "",
-              #norm = T,
-              grid = F,
-              #fastdisp = T,
+              grid = FALSE,
               wl = 100,
               flim = freq_Range,
               tlim = time_Range,
@@ -1092,8 +1090,8 @@ observeEvent(input$resetButton, {
     } else {
       plot(1, type = "n", xlab = "", ylab = "", main = "No WAV file found or selected species")
     }
-    shinyjs::hide("loadingMessageTop")
     
+    shinyjs::hide("loadingMessageTop")
   })
   
   
@@ -1165,6 +1163,8 @@ observeEvent(input$resetButton, {
       file.copy("www/Bericht.pdf", file)
     }
   )
+  
+  
   
   
   
