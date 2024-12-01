@@ -41,24 +41,48 @@ Artenliste<-data%>%
 
 ui <- navbarPage(
   title = div(
-    tags$a(
-      href = "http://www.oetternbach.de/",  # Replace with the desired URL
-      target = "_blank",              # Opens the link in a new tab
-      tags$img(
-        src = "Oetternbach-Logo-Magenta-300x298.png", 
-        height = "65px", 
-        style = "margin-right: 50px; margin-top: -20px; margin-left: 1px;"
+    div(
+      style = "display: flex; align-items: center;",  # Flexbox layout
+      tags$a(
+        href = "http://www.oetternbach.de/",  
+        target = "_blank",                   
+        tags$img(
+          src = "Oetternbach-Logo-Magenta-300x298.png", 
+          height = "120px",  # Adjust as needed
+          style = "margin-right: 37px;"  # Spacing between logo and title
+        )
+      ),
+      div(
+        "Oetternbach, Detmold - Bioakustik-Daten",  # Title text
+        style = "font-size: 19px; font-weight: bold; color: #5A5A5A;"  # Customize text
       )
-    ),
-    "Oetternbach, Detmold - Bioakustik-Daten"
+    )
   ),
   theme = shinytheme("simplex"),
+  
+  # Custom CSS for better control
   tags$style(HTML("
-        .navbar {
-            padding: 30px;
-             text-align: center;
-        }
-    ")),
+    .navbar { 
+      padding: 50px 30px;  /* Adjust top and horizontal padding */
+    }
+    
+    .navbar-brand {
+      display: flex;
+      align-items: center;  /* Vertically center content */
+      padding: 0;           /* Remove extra padding */
+    }
+    
+    .navbar-brand img {
+      margin-top: 5px;      /* Adjust vertical position of the logo */
+      margin-bottom: 5px;
+    }
+    
+    .navbar-brand div {     /* Adjustments for the title text */
+      line-height: 1.2;     /* Line height for better spacing */
+    }
+  ")),
+
+
   
   
   
@@ -133,21 +157,25 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
                )
              ),
              HTML("<div style='height:40px;'></div>"),
-             
+             fluidRow(
              box(
                width = 6, 
                status = "primary", 
                solidHeader = TRUE,
                class = "custom-box",
                HTML(paste0(
-                 '<div style="padding: 15px;">',
-                 '<h3 style="color: #3288bd; text-align: left;">Inhalt</h3>',
-                 '<p style="color: #333; line-height: 1.6; text-align: left;">',
+                 '<div style="padding: 5px;   #ddd; border-radius: 8px;">',
+                 '<h3 style="color: #2c7bb6; text-align: left;  margin-top: 5px; margin-bottom: 20px;">Inhalt</h3>',
+                 '<p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px; margin-bottom: 15px;">',
                  'Die vorliegende Analyse untersucht Audiodaten, die von März 2021 bis September 2022 an fünf Standorten im Gebiet Oetternbach aufgenommen wurden. ',
                  'Die Aufnahmen wurden alle 10 Minuten in Intervallen von einer Minute durchgeführt und mit dem BirdNet Analyzer ausgewertet. ',
+                 '</p>',
+                 '<p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px; margin-bottom: 15px;">',
                  'Die Daten wurden verifiziert und artspezifische Vertrauensniveaus ermittelt, um die Bestimmungsgenauigkeit zu erhöhen. ',
-                 'Von den 77 nachgewiesenen Vogelarten sind zehn Arten in Deutschland von besonderem naturschutzfachlichem Interesse, da sie aufgrund anthropogener Einflüsse auf ihre Lebensräume, ',
-                 'wie z.B. Bebauung und störende landwirtschaftliche Praktiken, rückläufige Bestandstrends aufweisen. ',
+                 'Von den 77 nachgewiesenen Vogelarten sind zehn Arten in Deutschland von besonderem naturschutzfachlichem Interesse, ',
+                 'da sie aufgrund anthropogener Einflüsse auf ihre Lebensräume, wie z.B. Bebauung und störende landwirtschaftliche Praktiken, rückläufige Bestandstrends aufweisen. ',
+                 '</p>',
+                 '<p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px;">',
                  'Das Gebiet um Oetternbach stellt einen wichtigen und wertvollen Lebensraum für bereits gefährdete Vogelarten dar.',
                  '</p>',
                  '</div>'
@@ -156,20 +184,20 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
              # Leaflet Map
              column(
                width = 6,
-               leafletOutput("map", height = "400px")
-             ),
+               leafletOutput("map", height = "450px")
+             )),
              
-             HTML("<div style='height:70px;'></div>"),
+            
              
              
-             HTML("<div style='height:60px;'></div>"),
+          
              
              # New row for plots
              fluidRow(
                # First plot
                column(
                  width = 6,
-                 HTML("<div style='height:60px;'></div>"),
+                 HTML("<div style='height:100px;'></div>"),
                  
                  titlePanel("Artenerfassung über Zeit"),
                  HTML("<div style='height:50px;'></div>"),
@@ -182,7 +210,7 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
                # Second plot
                column(
                  width = 6,
-                 HTML("<div style='height:60px;'></div>"),
+                 HTML("<div style='height:100px;'></div>"),
                  
                  titlePanel("Aufnahmedauer pro Monat"),
                  HTML("<div style='height:50px;'></div>"),
@@ -203,7 +231,7 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
   
   # Page 2: Species of Concern
   tabPanel("Besonders schützenswerte Arten",
-           fluidPage(
+           fluidPage( 
              tags$head(
                tags$style(HTML("
         /* Adjust table styling */
@@ -245,17 +273,26 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
                  DTOutput("birdTable", width = "100%")
                ),
                
-               # Right Column for the Iframe Box
+               # Right Column for the Iframe
                column(
-                 width = 7,  # Adjusted width
-                 div(
-                   class = "iframe-box",
-                   uiOutput("webFrame")
-                 )
+                 width = 7,
+                 # Conditional message display
+                 conditionalPanel(
+                   condition = "output.selectedSpecies == null || output.selectedSpecies == ''",
+                   div(id = "selectMessage", 
+                       style = "position: fixed; top: 70%; right: 12%; transform: translateY(-50%); 
+                  font-size: 18px; color: #555; text-align: left; 
+                  z-index: 9999;", 
+                       "Wählen Sie eine Art für mehr Informationen."
+                   )
+                 ),
+                 uiOutput("webFrame")
                )
-             )
-           )
-  ),
+             ))),
+             
+             
+          
+
   
   
   
@@ -311,6 +348,7 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
       .slider-vertical .irs-slider {
         height: 800px;  /* Adjust slider's thumb height */
       }
+
     "))
       ),
       
@@ -402,18 +440,24 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
            )
         )
       ),
-      
+    #  column(6, actionButton("applyButton", "Übernehmen", 
+     #                        style = "background-color: red !important; color: white !important; 
+      #                            border: none; padding: 10px 20px; font-size: 16px;margin-left: 450px;")),
+  #  column(6, actionButton("resetButton", "Zurücksetzen", 
+   #                        style = "background-color: red !important; color: white !important;  
+    #                              border: none; padding: 10px 20px; font-size: 16px;margin-left: -5px;"))
       HTML("<div style='height: 10px;'></div>"),
-      
-      
-      fluidRow(
-        column(6, actionButton("applyButton", "Übernehmen", 
-                               style = "background-color: red; color: white; 
-                                  border: none; padding: 10px 20px; font-size: 16px;margin-left: 450px;")),
-        column(6, actionButton("resetButton", "Zurücksetzen", 
-                               style = "background-color: red; color: white; 
-                                  border: none; padding: 10px 20px; font-size: 16px;margin-left: -5px;"))
-      ),
+
+
+  fluidRow(
+    column(6, actionButton("applyButton", "Übernehmen", 
+                           class = "btn btn-success custom-btn", 
+                           style = "font-size: 14px; padding: 5px 10px; margin-left: 500px;")),
+    column(6, actionButton("resetButton", "Zurücksetzen", 
+                           class = "btn btn-danger", 
+                           style = "font-size: 14px; padding: 5px 10px; margin-left: -5px;"))
+  ),
+  
     
        fluidRow(
         
@@ -532,7 +576,7 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
                              tags$li(tags$strong("Bericht:"), "Statischer Bericht der Ergebnisse."),
                              tags$li(tags$strong("Rohdaten:"), "Enthält alle aufgezeichneten Daten."),
                              tags$li(tags$strong("Artenliste:"), "Enthält eine Liste aller Arten und der Gesamtdetektionen."),
-                             tags$li(tags$strong("Audio Proben:"), "Audio-Proben für besonders schützenswerte Arten.")
+                             tags$li(tags$strong("Audio Proben:"), "Audio-Proben für alle erfassten Arten.")
                              
                      )
                  ),
@@ -850,16 +894,21 @@ server <- function(input, output, session) {
               ))
   })
   
-  # Observe button clicks to update the iframe
+  # Observe when a button is clicked (i.e., when a URL is selected)
+ 
+  # Initialize shinyjs
+  shinyjs::useShinyjs()
+  
   observeEvent(input$selected_url, {
-    output$webFrame <- renderUI({
-      tags$iframe(
-        src = input$selected_url,
-        width = "100%",
-        height = "500px",
-        style = "border:none;"
-      )
-    })
+    if (!is.null(input$selected_url)) {
+      # Set a reactive value or UI output to show the iframe or info
+      output$webFrame <- renderUI({
+        tags$iframe(src = input$selected_url, width = "100%", height = "500px", frameborder = "0")
+      })
+      
+      # Hide the "Select a species for more info" message when a species is selected
+      shinyjs::hide("selectMessage")
+    }
   })
   
  
