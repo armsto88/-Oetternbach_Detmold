@@ -49,12 +49,12 @@ ui <- navbarPage(
         tags$img(
           src = "Oetternbach-Logo-Magenta-300x298.png", 
           height = "120px",  # Adjust as needed
-          style = "margin-right: 30px;"  # Spacing between logo and title
+          style = "margin-right: 20px;"  # Spacing between logo and title
         )
       ),
       div(
         "Oetternbach, Detmold - Bioakustik-Daten",  # Title text
-        style = "font-size: 19px; font-weight: bold; color: #5A5A5A; margin-right: 40px;"  # Customize text
+        style = "font-size: 18px; font-weight: bold; color: #5A5A5A; margin-right: 20px;"  # Customize text
       )
     )
   ),
@@ -498,10 +498,10 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
   fluidRow(
     column(6, actionButton("applyButton", "Übernehmen", 
                            class = "btn btn-success custom-btn", 
-                           style = "font-size: 14px; padding: 5px 10px; margin-left: 500px;")),
+                           style = "font-size: 14px; padding: 5px 10px; margin-left: 460px;")),
     column(6, actionButton("resetButton", "Zurücksetzen", 
                            class = "btn btn-secondary", 
-                           style = "font-size: 14px; padding: 5px 10px; margin-left: -5px;"))
+                           style = "font-size: 14px; padding: 5px 10px; margin-left: 10px;"))
     
     
   ),
