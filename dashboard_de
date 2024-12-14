@@ -18,11 +18,11 @@ library(shinythemes)
 
 
 # Load the data
-data <- read.csv("Master_V2_27.11.csv",row.names = 1)
+data <- read.csv("Master_4.12.24.csv",row.names = 1)
 #SITE_data<- read.csv("Site_data.csv")
 #result <- read.csv("Species_of_concern_12.11.24.csv")
 species_list <- read.csv("species_list_v3.csv",row.names = 1)
-coverage <- read.csv("coverage.csv")
+coverage <- read.csv("coverage_v2.csv")
 
 
 data <- data %>%
@@ -49,12 +49,12 @@ ui <- navbarPage(
         tags$img(
           src = "Oetternbach-Logo-Magenta-300x298.png", 
           height = "120px",  # Adjust as needed
-          style = "margin-right: 37px;"  # Spacing between logo and title
+          style = "margin-right: 30px;"  # Spacing between logo and title
         )
       ),
       div(
         "Oetternbach, Detmold - Bioakustik-Daten",  # Title text
-        style = "font-size: 19px; font-weight: bold; color: #5A5A5A;"  # Customize text
+        style = "font-size: 19px; font-weight: bold; color: #5A5A5A; margin-right: 40px;"  # Customize text
       )
     )
   ),
@@ -164,21 +164,30 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
                solidHeader = TRUE,
                class = "custom-box",
                HTML(paste0(
-                 '<div style="padding: 5px;   #ddd; border-radius: 8px;">',
-                 '<h3 style="color: #2c7bb6; text-align: left;  margin-top: 5px; margin-bottom: 20px;">Inhalt</h3>',
-                 '<p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px; margin-bottom: 15px;">',
-                 'Die vorliegende Analyse untersucht Audiodaten, die von März 2021 bis September 2022 an fünf Standorten im Gebiet Oetternbach aufgenommen wurden. ',
-                 'Die Aufnahmen wurden alle 10 Minuten in Intervallen von einer Minute durchgeführt und mit dem BirdNet Analyzer ausgewertet. ',
-                 '</p>',
-                 '<p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px; margin-bottom: 15px;">',
-                 'Die Daten wurden verifiziert und artspezifische Vertrauensniveaus ermittelt, um die Bestimmungsgenauigkeit zu erhöhen. ',
-                 'Von den 77 nachgewiesenen Vogelarten sind zehn Arten in Deutschland von besonderem naturschutzfachlichem Interesse, ',
-                 'da sie aufgrund anthropogener Einflüsse auf ihre Lebensräume, wie z.B. Bebauung und störende landwirtschaftliche Praktiken, rückläufige Bestandstrends aufweisen. ',
-                 '</p>',
-                 '<p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px;">',
-                 'Das Gebiet um Oetternbach stellt einen wichtigen und wertvollen Lebensraum für bereits gefährdete Vogelarten dar.',
-                 '</p>',
-                 '</div>'
+                 '<div style="padding: 5px; border-radius: 8px;">
+    <h3 style="color: #2c7bb6; text-align: left; margin-top: 5px; margin-bottom: 20px;">Inhalt</h3>
+    <p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px; margin-bottom: 15px;">
+        Die vorliegende Analyse untersucht Audiodaten, die von März 2021 bis September 2022 an fünf Standorten im Gebiet Oetternbach aufgenommen wurden.
+        Die Aufnahmen wurden alle 10 Minuten in Intervallen von einer Minute durchgeführt und mit dem BirdNet Analyzer ausgewertet.
+    </p>
+    <p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px; margin-bottom: 15px;">
+        Die Daten wurden verifiziert und artspezifische Vertrauensniveaus ermittelt, um die Bestimmungsgenauigkeit zu erhöhen.
+        Von den 55 nachgewiesenen Vogelarten sind 6 Arten in Deutschland von besonderem naturschutzfachlichem Interesse,
+        da sie aufgrund anthropogener Einflüsse auf ihre Lebensräume, wie z.B. Bebauung und störende landwirtschaftliche Praktiken, rückläufige Bestandstrends aufweisen.
+    </p>
+    <p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px;">
+        Das Gebiet um Oetternbach stellt einen wichtigen und wertvollen Lebensraum für bereits gefährdete Vogelarten dar.
+    </p>
+    <p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px; margin-top: 20px;">
+        Nicht alle Zeitpunkte und Standorte wurden mit der gleichen Intensität beprobt. Störungen der Aufnahmegeräte, Batterieprobleme oder defekte SD-Karten können zu Ausfällen führen. 
+        Einen Überblick geben die Abbildungen rechts unten. Diese Beprobungsintensität wirkt sich direkt auf die Anzahl der gefundenen Arten aus (vergleiche Abbildungen unten links (Gruppierung nach Monaten) mit der Abbildung unten rechts). 
+        Vor allem im Frühjahr 2021 kam es leider zu erheblichen Ausfällen, weshalb in diesem Zeitraum nur wenige Arten gefunden wurden.
+    </p>
+    <p style="color: #333; line-height: 1.4; text-align: left; font-size: 16px; margin-top: 20px;">
+        Die Audioaufnahmen reflektieren die akustischen Aktivitätszeiten der identifizierten Tierarten für den Aufnahmezeitraum. 
+        Die Ergebnisse sind nicht vergleichbar mit einer Brutvogelkartierung.
+    </p>
+</div>'
                ))
              ),
              # Leaflet Map
@@ -229,70 +238,94 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
            )
   ),
   
-  # Page 2: Species of Concern
   tabPanel("Besonders schützenswerte Arten",
-           fluidPage( 
+           fluidPage(
              tags$head(
                tags$style(HTML("
-        /* Adjust table styling */
+        /* Data table styling */
         .dataTable {
-          font-size: 12px;
+          font-size: 14px;
           margin: 0;
           padding: 5px;
         }
         .dataTable th, .dataTable td {
-          padding: 4px;  /* Slightly increased for readability */
+          padding: 6px;
         }
 
-        /* Styling for iframe box */
-        .iframe-box {
-          background-color: #f9f9f9;  /* Light background */
-          border: 1px solid #ccc;  /* Border around iframe */
-          padding: 10px;
-          border-radius: 8px;  /* Rounded corners */
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);  /* Light shadow */
-          height: 500px;  /* Fixed height */
+        /* Custom box styling */
+        .custom-box {
+          background-color: #f9f9f9;
+          border: 1px solid #ccc;
+          padding: 15px;
+          border-radius: 10px;
+          box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+          margin-bottom: 20px;
+          overflow-y: visible;  /* No vertical scroll */
         }
-        
-        /* Adjust row and column spacing */
-        .shiny-column {
-          margin-top: 10px;
+
+        /* Title styling */
+        h3 {
+          color: #2c7bb6;
+          font-size: 20px;
+          margin-bottom: 15px;
+        }
+
+        /* Content paragraphs */
+        p {
+          color: #333;
+          line-height: 1.6;
+          font-size: 16px;
+          margin-bottom: 10px;
         }
       "))
              ),
              
              titlePanel("Besonders schützenswerte Arten"),
-             
-             # Adjust spacing between title and content
-             HTML("<div style='height:70px;'></div>"),
+             HTML("<div style='height:50px;'></div>"),
              
              fluidRow(
-               # Left Column for the Table
+               # Left column: Data table
                column(
-                 width = 5,  # Adjusted width
+                 width = 6,
                  DTOutput("birdTable", width = "100%")
                ),
                
-               # Right Column for the Iframe
+               # Right column: Information box
                column(
-                 width = 7,
-                 # Conditional message display
-                 conditionalPanel(
-                   condition = "output.selectedSpecies == null || output.selectedSpecies == ''",
-                   div(id = "selectMessage", 
-                       style = "position: fixed; top: 70%; right: 12%; transform: translateY(-50%); 
-                  font-size: 18px; color: #555; text-align: left; 
-                  z-index: 9999;", 
-                       "Wählen Sie eine Art für mehr Informationen."
-                   )
-                 ),
-                 uiOutput("webFrame")
-               )
-             ))),
-             
-             
-          
+                 width = 6,
+                 div(class = "custom-box",
+                     HTML("
+                     
+            <h3>Kiebitz</h3>
+            <p>Das Trockenlegen von Feuchtgebieten und deren Umwandlung in Ackerland bedrohen diese Art stark. Zudem erhöht sich die Nestprädation, und moderne landwirtschaftliche Praktiken stören Brutgebiete. Der Klimawandel verstärkt den Lebensraumverlust.</p>
 
+            <h3>Feldlerche</h3>
+            <p>Intensive Landwirtschaft, insbesondere Monokulturen und häufiges Mähen, zerstören Nistplätze. Der Einsatz von Pestiziden reduziert die Insektenpopulation, was die Fütterung der Küken erschwert. Zudem trägt der Lebensraumverlust durch urbane Expansion und Entwässerung zur Bedrohung bei.</p>
+
+        
+            <h3>Star</h3>
+            <p>Der Verlust von natürlichen Nistplätzen durch Abholzung und Änderungen in der Landwirtschaft stellt eine Bedrohung dar. Insektenrückgang durch Pestizide reduziert die Nahrungsversorgung. Urbanisierung begrenzt ebenfalls geeignete Lebensräume.</p>
+
+            <h3>Rauchschwalbe</h3>
+            <p>Der Rückgang der Insektenpopulation aufgrund von Pestiziden gefährdet die Nahrungssicherheit. Moderne Gebäude bieten kaum geeignete Nistplätze, und der Verlust traditioneller Agrarlandschaften schränkt die Nahrungssuche ein.</p>
+
+            
+            <h3>Rotmilan</h3>
+            <p>Vergiftungen durch Rodentizide und illegale Köder sind eine bedeutende Gefahr. Kollisionen mit Windkraftanlagen und Stromleitungen stellen direkte Risiken dar. Fragmentierung und Verlust des Lebensraums verringern zudem Jagdmöglichkeiten.</p>
+
+            
+            <h3>Wachtel</h3>
+            <p>Intensive Landwirtschaft und Lebensraumverlust durch Landumwandlungen verringern geeignete Brutgebiete. Die Jagd während der Migration, besonders in Südeuropa, gefährdet die Population erheblich.</p>
+          ")
+                 )
+               )
+             )
+           )
+  ),
+  
+  
+             
+             
   
   
   
@@ -378,12 +411,20 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
         column(
           width = 6,
           HTML("<div style='height:50px;'></div>"),
-          selectInput("speciesSelect", "Art auswählen", choices = unique(data$Artname), selected = "Kohlmeise", multiple = TRUE),
+          selectInput("speciesSelect", "Art auswählen", choices = unique(data$Artname), selected = "Amsel", multiple = TRUE),
           selectInput("agg_type", "Gruppierung:", choices = c("Monat", "Jahr"), selected = "Monat"),
+          HTML("<div style='height:10px;'></div>"),
+          div(
+            style = "position: relative;",
+            actionButton("toggle_axis", "Aufnahmedauer pro Monat", class = "btn btn-primary btn-sm", style = "position: absolute; right: 20px; top: 10px;")
+          ),
+          HTML("<div style='height:40px;'></div>"),
+          
           plotOutput("monthlyPlot", height = "350px"),
           HTML("<div style='height:30px;'></div>"),
           plotOutput("hourlyPlot", height = "350px")
         ),
+       
         
         column(
           width = 6,
@@ -464,6 +505,33 @@ box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
     
     
   ),
+  
+  fluidRow(
+    
+    
+    
+    HTML("<div style='height: 30px;'></div>"),
+    div(
+      style = "padding: 20px; text-align: left; margin-left: 200px;",  # Center text inside the full-width box
+      box(
+        width = 10,  # Full width of the page
+        status = "primary",
+        solidHeader = TRUE,
+        class = "custom-box",
+        style = "padding: 15px; line-height: 1.6;",  # Increased padding and line height
+        HTML(paste0(
+          "<div>
+  <h4 style='color: #3288bd; margin-bottom: 10px;'>Spektrogramm und Audio</h4>
+  <p style='margin-bottom: 5px;'> Um das Spektrogramm näher zu betrachten, können die beiden blauen Schieberegler manuell angepasst werden, um in einen Zeit- oder Frequenzbereich hinein zu zoomen. Sobald die Schieberegler positioniert sind, wird durch Drücken des 'Übernehmen'-Buttons die Änderung vorgenommen und das Spektrogramm modifiziert. Der 'Zurücksetzen'-Button stellt das Spektrogramm in seinen ursprünglichen Zustand zurück. Drei Kontrasteinstellungen wurden vordefiniert und können mit den drei Buttons unter dem Spektrogramm ausgewählt werden. Die Audio-Wiedergabe kann durch Klicken auf das Wiedergabe-Symbol im Feld über dem Spektrogramm gestartet werden.
+  <p style='margin-bottom: 5px;'>Die ausgewählte Art wurde in dieser Audioaufnahme entdeckt. Es ist natürlich möglich, dass auch andere Arten in dieser Aufnahme zu hören sind.</p>
+</div>"
+        ))
+      )
+    )
+  ),
+  
+    
+  
   
 
   
@@ -722,7 +790,8 @@ server <- function(input, output, session) {
                        options = layersControlOptions(collapsed = FALSE)  # Options to keep the control expanded
       )%>%
       
-      addMarkers(lat = ~LAT,lng = ~LNG, popup = ~paste("<b>Standortname:</b>", site_name, "<br><b>Einzigartige Arten:</b>", unique,"<br><b>Besorgniserregende Arten:</b>",Concern ))
+      addMarkers(lat = ~LAT,lng = ~LNG, popup = ~paste("<b>Standortname:</b>", site_name, "<br><b>Anzahl an Vogelarten:</b>",
+      unique,"<br><b>schützenswerte Arten:</b>",Concern ))
     
   })
   
@@ -858,30 +927,30 @@ server <- function(input, output, session) {
     rename(
       Erhaltungsstatus = erhaltungsstatus
     ) %>%
-    mutate(URL = case_when(
-      Artname == "Grauschnäpper" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/grauschnaepper/",
-      Artname == "Feldlerche" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/feldlerche/",
-      Artname == "Kiebitz" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/kiebitz/",
-      Artname == "Bluthänfling" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/bluthaenfling/",
-      Artname == "Star" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/star/",
-      Artname == "Rotmilan" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/rotmilan/",
-      Artname == "Rauchschwalbe" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/rauchschwalbe/",
-      Artname == "Wachtel" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/wachtel/",
-      Artname == "Feldsperling" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/feldsperling/"
-    )) %>%
-    mutate(Info. = paste0("<button class='btn btn-info btn-sm' onclick=\"Shiny.setInputValue('selected_url', '", URL, "', {priority: 'event'})\">Offen</Info.>")) %>%
+#    mutate(URL = case_when(
+ #     Artname == "Grauschnäpper" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/grauschnaepper/",
+#      Artname == "Feldlerche" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/feldlerche/",
+#      Artname == "Kiebitz" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/kiebitz/",
+#      Artname == "Bluthänfling" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/bluthaenfling/",
+#      Artname == "Star" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/star/",
+#      Artname == "Rotmilan" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/rotmilan/",
+#      Artname == "Rauchschwalbe" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/rauchschwalbe/",
+#      Artname == "Wachtel" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/wachtel/",
+#      Artname == "Feldsperling" ~ "https://www.nabu.de/tiere-und-pflanzen/voegel/portraets/feldsperling/"
+ #   )) %>%
+#    mutate(Info. = paste0("<button class='btn btn-info btn-sm' onclick=\"Shiny.setInputValue('selected_url', '", URL, "', {priority: 'event'})\">Offen</Info.>")) %>%
     mutate(Erhaltungsstatus = factor(Erhaltungsstatus, levels = c("Stark gefährdet", "gefährdet", "Vorwarnliste"))) %>%
     arrange(Erhaltungsstatus)
   
   ############## TABLE ############################
   
   output$birdTable <- renderDT({
-    datatable(result %>% select(Artname, Erhaltungsstatus, Erfassung, Info.),  # Exclude the raw URL column from display
+    datatable(result %>% select(Artname, Erhaltungsstatus, Erfassung),  # Exclude the raw URL column from display
               escape = FALSE,  # Allow HTML for buttons
               rownames = FALSE,
               selection = "none",  # Disable row selection
               options = list(
-                pageLength = 16,
+                pageLength = 6,
                 dom = 'tip',
                 columnDefs = list(list(
                   className = 'dt-center',
@@ -913,6 +982,16 @@ server <- function(input, output, session) {
   
   # Monthly Plot
   # Reactive expression to aggregate data based on selection
+
+  static_total_hours <- reactive({
+    coverage %>%
+      filter(!is.na(month_year)) %>%
+      group_by(month_year) %>%
+      summarize(total_hours = sum(count, na.rm = TRUE)) %>%
+      mutate(my = ymd(paste0(month_year, "-01"))) %>%
+      select(my, total_hours)
+  })
+  
   aggregated_data <- reactive({
     if (input$agg_type == "Monat") {
       data %>%
@@ -927,14 +1006,25 @@ server <- function(input, output, session) {
     }
   })
   
-  start_date <- as.Date("2021-03-01")  # Change this to your desired start date
+  start_date <- as.Date("2021-03-01")  
   end_date <- as.Date("2022-10-01")
   
+  # Reactive value to store whether the secondary y-axis is visible
+  show_sec_axis <- reactiveVal(F)
   
+  # Toggle the visibility of the secondary y-axis when the button is pressed
+  observeEvent(input$toggle_axis, {
+    show_sec_axis(!show_sec_axis())  # Toggle the value
+  })
   
   output$monthlyPlot <- renderPlot({
-    req(input$speciesSelect)
+    req(input$speciesSelect, input$agg_type)  # Ensure both inputs are available
     
+    # Create a temporary dataframe for static_total_hours with a dummy 'Artname' column
+    temp_static_total_hours <- static_total_hours() %>%
+      mutate(Artname = "All Species")  # Or any default species or relevant data
+    
+    # Main line plot
     p <- ggplot(aggregated_data(), aes(x = if (input$agg_type == "Monat") my else Year, 
                                        y = Total.detections, 
                                        colour = Artname)) +
@@ -951,15 +1041,33 @@ server <- function(input, output, session) {
       labs(title = "Monatliche / Jährliche Erfassung", x = "Zeit", y = "Erfassung", colour = "Artnamen") +
       scale_colour_brewer(palette = "Set2")
     
-    # Apply scale_x_date only if "Month" is selected
+    # Apply scale_x_date only if "Monat" is selected
     if (input$agg_type == "Monat") {
       p <- p + scale_x_date(date_labels = "%b %Y", date_breaks = "1 month", limits = c(start_date, end_date))
     } else {
       p <- p + scale_x_continuous(breaks = seq(min(aggregated_data()$Year), max(aggregated_data()$Year), 1))
     }
     
+    # Add static bar chart for recording hours if toggled on
+    if (show_sec_axis()) {
+      p <- p + geom_bar(data = temp_static_total_hours,  # Use the modified data with 'Artname'
+                        aes(x = my, y = total_hours, fill = Artname),  # Map 'Artname' as fill
+                        stat = "identity", 
+                        alpha = 0.3) +
+        scale_fill_manual(values = "#66c2a5")+
+        theme(legend.position = "none" )+
+        scale_y_continuous(
+          sec.axis = sec_axis(~ . / 100, name = "Aufnahmedauer (in Stunden)")
+        )
+    }
+    
     p
   })
+  
+  
+  
+  
+  
   
   # Hourly Plot
   output$hourlyPlot <- renderPlot({
@@ -990,7 +1098,7 @@ server <- function(input, output, session) {
               escape = FALSE, 
               rownames = F,
               options = list(
-                pageLength = 20,
+                pageLength = 25,
                 columnDefs = list(list(
                   className = 'dt-center', 
                   targets = "_all"  # Centers all columns
@@ -1160,7 +1268,7 @@ observeEvent(input$resetButton, {
     },
     content = function(file) {
       # Copy the report from the 'www' directory to the download location
-      file.copy("www/Bericht.pdf", file)
+      file.copy("www/Bericht_v3.pdf", file)
     }
   )
   
